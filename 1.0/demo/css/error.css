@@ -1,0 +1,16 @@
+.error-wrap{
+    height:335px;
+}
+.error-image{
+    margin:37px auto auto auto;
+    width:128px;
+    height:165px;
+    background:url('../img/error.png') 0 0 no-repeat;
+}
+.error-message{
+    margin-top:16px;
+    text-align:center;
+    color:#666;
+    font-family:"宋体";
+    font-size:14px;
+}

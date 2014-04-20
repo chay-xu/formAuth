@@ -1,0 +1,2 @@
+/*!build time : 2014-04-20 5:18:09 PM*/
+KISSY.add(function(a,b,c,d){return d.decorate=function(c,e){var f=[],g=e&&e.attributes||{};a.each(c.options,function(c){var d={text:c.text,value:c.value};a.each(g,function(a,e){d[e]=b.attr(c,a)}),f.push(d)});var h=c.options[c.selectedIndex],i=a.merge({selectedItem:{value:h.value,text:h.text},fieldName:b.attr(c,"name"),dataSource:f,insertion:function(a){try{b.replaceWith(c,a)}catch(d){b.insertBefore(a,c),b.remove(c)}}},e);return new d(i)},d},{requires:["dom","event","./droplist"]});
