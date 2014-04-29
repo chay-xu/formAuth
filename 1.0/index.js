@@ -5,7 +5,7 @@
  * @author: bigwind
  */
 
-KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate, FormModle, RegValidate ) {
+KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, RegValidate, FormModle, FormViwe ) {
     var $ = S.Node.all,
         E = S.Event,
         D = S.DOM,
@@ -14,26 +14,27 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate, FormModle, RegV
         isTrue = true,
         reg = RegValidate,
         def = {
-            attrName: "data-valid",
-            attrTipParent: "data-parent",
-            attrDisable: "data-disable",
-            attrReadonly: "readonly",
+            attrName: 'data-valid',
+            attrTipParent: 'data-parent',
+            attrDisable: 'data-disable',
+            attrReadonly: 'readonly',
+            attrEvent: 'data-event',
             isReadonly: false,
-            isAllTip: true,
-            tipClass: '.tip',
+            isAllTip: false,
+            isTipSuc: true,
             msg:{
                 tpl:'<div class="tip tip-error">{{msg}}</div>'
             }
         };
         
-    function Validate() {
+    function FormAuth() {
         this._init.apply(this, arguments);
     }
 
     
-    S.augment( Validate, {
-        constructor: Validate,
-        version: '1.0',
+    S.augment( FormAuth, {
+        constructor: FormAuth,
+        version: '1.0.0',
         _init: function( element, config ) {
             var self = this;
 
@@ -42,15 +43,19 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate, FormModle, RegV
             //config
             self.cfg = S.merge( def, config );
 
-            self.$ele = $( element );
-
-            self.$list = self._getNodeList( self.$ele );
-            //cache attr
-            // self.cache.attr = self._getAttr();
             //cache reg
             self.cache.reg = self.getRegexp();
 
-            self._bindEvent();
+            self._viwe = new FormModle( element, self.cfg, self.cache.reg );
+
+            // self.$modle = self._getNodeList( self.$ele );
+            //self.$nodeList = self._viwe.$nodeList;
+            console.log(self.$nodeList)
+            //cache attr
+            // self.cache.attr = self._getAttr();
+
+            // self._viwe._bindEvent( self.$modle, self.cache.reg );
+            // self._bindEvent();
 
         },
         _getNodeList: function( parent ){
@@ -60,6 +65,13 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate, FormModle, RegV
                 cfg = self.cfg,
                 name = cfg.attrName;
 
+            /* 
+             * 有attrName属性加入到model
+             * @val { text|hidden|file|password } input
+             * @val { radio|checkbox } input
+             * @val { select } select
+             * @val { textarea } textarea
+             */
             nodelist.each(function( i ){
                 var data = i.attr( name );
 
@@ -73,7 +85,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate, FormModle, RegV
         _bindEvent: function(){
             var self = this;
 
-            S.each( self.$list, function( i, key ){
+            S.each( self.$modle, function( i, key ){
                 i.on('blur', function(){
                     if( i.attr('readonly') === 'readonly' ){
                         
@@ -256,8 +268,9 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate, FormModle, RegV
         getRegexp: function(){
             return reg;
         },
-        add: function(){
-
+        // bind a new validate
+        field: function( className, regexp ){
+            $( className )
         },
         //添加正则
         addRule: function( regObj ){
@@ -309,7 +322,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate, FormModle, RegV
         }
     });
 
-    return Validate;
+    return FormAuth;
 }, {
-    requires: [ 'event', 'node', 'dom', 'ajax', 'sizzle', 'xtemplate', './formModle', './regexp/formAuth-zh_CN' ]
+    requires: [ 'event', 'node', 'dom', 'ajax', 'sizzle', './regexp/formAuth-zh_CN', './formModle', './formViwe' ]
 });

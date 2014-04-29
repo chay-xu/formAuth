@@ -32,7 +32,6 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate, FormModle, RegV
 
     S.augment( Validate, {
         constructor: Validate,
-        version: '1.0',
         _init: function( element, config ) {
             var self = this;
 
