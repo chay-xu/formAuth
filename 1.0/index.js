@@ -57,7 +57,6 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegVa
 
             // self.$model = self._getNodeList( self.$ele );
             //self.$nodeList = self._viwe.$nodeList;
-            console.log(self._model._uuid_)
             //cache attr
             // self.cache.attr = self._getAttr();
 
@@ -107,17 +106,17 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegVa
                 $( arguments[0] ).fire('keydown');
             }else{
                 S.each( self._model, function( i, key ){
-
-                    i.$el.fire('keyup');
-                    if( !self.cfg.isAllTip && self._model.isSubmit != true ){
-                        i.fire( 'focus' );
-                        return false;
-                    }
+console.log(i.$el)
+                    // i.$el.fire('keydown');
+                    // if( !self.cfg.isAllTip && self._model.isSubmit != true ){
+                    //     i.$el.fire( 'focus' );
+                    //     return false;
+                    // }
                     
                 }) 
             }
             
-            return isTrue;
+            return self._model.isSubmit;
         }
     });
 

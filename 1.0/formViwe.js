@@ -65,15 +65,22 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
                         attrObj = self._getAttr( i );
                         attrObj.bindEle = nameNode;
                         
-                		for ( n = nameNode.length - 1 ; n >= 0; n-- ) {
-                			//list.push( $( nameNode[ n ] ) );
-                            self._setModel( $( nameNode[ n ] ), attrObj )
-                		};
+                		// for ( n = nameNode.length - 1 ; n >= 0; n-- ) {
+                		// 	//list.push( $( nameNode[ n ] ) );
+                  //           console.log( $( nameNode[ n ] ) );
+                  //           //(function( n ){
+                  //               self._setModel( $( nameNode[ n ] ), attrObj, n );
+                  //           //})( n );
+                		// };
+                        S.each( nameNode, function( i, key ){
+                            self._setModel( $( nameNode[ n ] ), attrObj );
+                        })
                 		
                 	}else{
-                        attrObj = self._getAttr( i );
+                        //attrObj = self._getAttr( i );
                 		//list.push( i );
-                        self._setModel( i, attrObj );
+                        //self._setModel( i, attrObj );
+                        // console.log( i )
                 	};
                     
                 };
@@ -119,7 +126,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
         _setModel: function( element, attrObj ){
             var self = this,
                 i = element;
-
+console.log(arguments[2]);
             self._model.setModel( self._model._uuid_, attrObj);
             
             i.data( self._guid, self._model._uuid_++ );
