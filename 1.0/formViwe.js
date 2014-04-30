@@ -65,22 +65,13 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
                         attrObj = self._getAttr( i );
                         attrObj.bindEle = nameNode;
                         
-                		// for ( n = nameNode.length - 1 ; n >= 0; n-- ) {
-                		// 	//list.push( $( nameNode[ n ] ) );
-                  //           console.log( $( nameNode[ n ] ) );
-                  //           //(function( n ){
-                  //               self._setModel( $( nameNode[ n ] ), attrObj, n );
-                  //           //})( n );
-                		// };
-                        S.each( nameNode, function( i, key ){
-                            self._setModel( $( nameNode[ n ] ), attrObj );
-                        })
+                        //nameNode.each(function( i, key ){
+                            self._setModel( i, attrObj );
+                        //})
                 		
                 	}else{
-                        //attrObj = self._getAttr( i );
-                		//list.push( i );
-                        //self._setModel( i, attrObj );
-                        // console.log( i )
+                        attrObj = self._getAttr( i );
+                        self._setModel( i, attrObj );
                 	};
                     
                 };
@@ -126,7 +117,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
         _setModel: function( element, attrObj ){
             var self = this,
                 i = element;
-console.log(arguments[2]);
+
             self._model.setModel( self._model._uuid_, attrObj);
             
             i.data( self._guid, self._model._uuid_++ );
@@ -139,22 +130,41 @@ console.log(arguments[2]);
                 regObj = self._reg;
 
             S.each( model, function( i, key ){
-                i.$el.on('keydown blur', function( e ){
-                    var ele = e.target,
-                        $ele = $( ele ),
-                        index = $ele.data( self._guid ),
-                        attrObj = i;
+                if( i.bindEle ){
+                    i.bindEle.each(function( el ){
+                        el.on('click', function( e ){
+                            var attrObj = i;
 
-                    // 启用 validate
-                    if( attrObj.disable === 'false' ){
-                        return;
-                    }
-                    // data-valid 上有数据，否则结束
-                    if( attrObj.reg && typeof attrObj.reg === "object" ){
-                        var isTrue = self._regEvent( $ele, attrObj, regObj );
-                    }
-                });
+                            // 启用 validate
+                            if( attrObj.disable === 'false' ){
+                                return;
+                            }
+                            // data-valid 上有数据，否则结束
+                            if( attrObj.reg && typeof attrObj.reg === 'object' ){
+                                self._regEvent( el, attrObj, regObj );
+                            }
+                        })
+                    })
+                }else{
+                    i.$el.on('keydown blur', function( e ){
+                        var attrObj = i;
+
+                        // 启用 validate
+                        if( attrObj.disable === 'false' ){
+                            return;
+                        }
+                        // data-valid 上有数据，否则结束
+                        if( attrObj.reg && typeof attrObj.reg === 'object' ){
+                            self._regEvent( i.$el, attrObj, regObj );
+                        }
+                    });
+                }
+                
             });
+
+            function _bindEventHandlle( ele ){
+                
+            }
         },
         _regEvent: function( element, attrObj, regObj ){
             var self = this,
