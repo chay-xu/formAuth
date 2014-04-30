@@ -12,11 +12,11 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegVa
         UA = S.UA,
         isUpload = false,
         def = {
-            attrName: 'data-valid',
+            attrData: 'data-valid',
             attrTipParent: 'data-parent',
             attrDisable: 'data-disable',
             attrReadonly: 'readonly',
-            attrEvent: 'data-event',
+            attrCheck: 'data-check',
             isReadonly: false,
             isAllTip: false,
             isTipSuc: true,
@@ -78,6 +78,8 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegVa
 
             if( status )
                 self._viwe._removeTip( ele, attrObj );
+
+            return this;
         },
         //添加正则
         addRule: function( regObj ){
@@ -95,28 +97,32 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegVa
                 index = $( className ).data( self._guid );
 
             S.mix( self._model[ index ].reg, regexp );
+
+            return this;
         },
         valid: function(){
             var self = this,
                 cfg = self.cfg;
             
-            self._model.isSubmit = true;
+            self._modelObj.isSubmit = true;
 
             if( arguments[0] ){
-                $( arguments[0] ).fire('keydown');
+                $( arguments[0] ).fire('keyup');
             }else{
                 S.each( self._model, function( i, key ){
-console.log(i.$el)
-                    // i.$el.fire('keydown');
-                    // if( !self.cfg.isAllTip && self._model.isSubmit != true ){
-                    //     i.$el.fire( 'focus' );
-                    //     return false;
-                    // }
+
+                    i.$el.fire('keyup');
+                    if( !self.cfg.isAllTip && self._model.isSubmit === false ){
+                        i.$el.fire( 'focus' );
+                        console.log(i) 
+                        return false;
+                    }
                     
-                }) 
+                })
+                
             }
             
-            return self._model.isSubmit;
+            return self._modelObj.isSubmit;
         }
     });
 

@@ -5,11 +5,20 @@
  * @file: regexp
  * @author: bigwind
  */
-/*
+
+/**
  * html attribute
  * regexp: { boolean }
  * regexp: { object }
  * function: { array }
+ *
+ */
+
+/**
+ * function regexp param
+ * @param { agruments } agruments 
+ * @param { string }    value
+ * @param { object }    S.Node.all
  *
  */
 KISSY.add( function( S ) {
@@ -45,15 +54,24 @@ KISSY.add( function( S ) {
                 reg: /^([a-zA-Z0-9\_\-\.])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$/, 
                 errmsg: '邮箱格式不正确'
             },
-            // txt: [ /^(([a-zA-Z]:)|(\\{2}\w+)\$?)(\\(\w[\w ]*))+\.(txt|TXT)$/, ['只能是txt文件']],
             txt: { 
                 reg: /\.(txt|TXT)$/, 
                 errmsg: '只能是txt文件'
             },
+            bind: function( bindName, val, $ ){
+                var bindVal = $('[name='+ bindName + ']').val();
+
+                if( bindVal != val ){
+                    return {
+                        status: false,
+                        msg: '密码长度不一致'
+                    }
+                }
+            },
             maxLength: function( length, val ){
                 if( val.length > length ){
                     return {
-                        status: true,
+                        status: false,
                         msg: '最大长度不能超过' + length
                     }
                 } 
@@ -70,7 +88,7 @@ KISSY.add( function( S ) {
                     filesize = obj_img.fileSize;  
                 }else{  
                     return {
-                        status: true,
+                        status: false,
                         msg: "无法获取文件大小，文件小于"+ size +'K'
                     };
                 }
@@ -78,7 +96,7 @@ KISSY.add( function( S ) {
 
                 if( filesize > size ){
                     return {
-                        status: true,
+                        status: false,
                         msg: '上传文件不能大于'+ size +'K'
                     };
                 }

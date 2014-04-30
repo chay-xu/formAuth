@@ -27,10 +27,10 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
             self._reg = regexp;
 
             // model
-            self._model = model;
+            self._modelObj = model;
 
             // 唯一的uuid
-            self._guid = self._model._guid;
+            self._guid = self._modelObj._guid;
 
             self.$ele = $( element );
 
@@ -43,20 +43,22 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
                 nodelist = self.$ele.all( 'input,select,textarea' ),
                 list = [],
                 cfg = self.cfg,
-                attrName = cfg.attrName;
+                attrData = cfg.attrData,
+                attrCheck = cfg.attrCheck;
 
             /* 
-             * 有attrName属性加入到model
+             * 有attrData属性加入到model
              * @val { text|hidden|file|password } input
              * @val { radio|checkbox } input
              * @val { select } select
              * @val { textarea } textarea
              */
             nodelist.each(function( i ){
-                var data = i.attr( attrName ),
+                var data = i.attr( attrData ),
                     attrObj;
 
                 if( data ){
+                    // radio/checkbox/data-bind
                 	if( i[0].type === 'radio' || i[0].type === 'checkbox' ){
                 		var name = i.attr( 'name' ),
                 			nameNode, n;
@@ -65,13 +67,17 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
                         attrObj = self._getAttr( i );
                         attrObj.bindEle = nameNode;
                         
-                        //nameNode.each(function( i, key ){
-                            self._setModel( i, attrObj );
-                        //})
-                		
+                        nameNode.each(function( el ){
+                            var newObj = S.merge( attrObj );
+
+                            newObj.$el = el;
+
+                            self._modelObj.setModel( el, newObj );    
+                        })                       
+                	// input/textarea/select
                 	}else{
                         attrObj = self._getAttr( i );
-                        self._setModel( i, attrObj );
+                        self._modelObj.setModel( i, attrObj );
                 	};
                     
                 };
@@ -98,8 +104,8 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
                     }
                 };
 
-            if( i.attr( cfg.attrName ) ){
-                obj.reg = self._json( i.attr( cfg.attrName ) );
+            if( i.attr( cfg.attrData ) ){
+                obj.reg = self._json( i.attr( cfg.attrData ) );
             }
 
             if( i.attr( cfg.attrDisable ) ){
@@ -118,53 +124,32 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
             var self = this,
                 i = element;
 
-            self._model.setModel( self._model._uuid_, attrObj);
+            self._modelObj.setModel( self._modelObj._uuid_, attrObj);
             
-            i.data( self._guid, self._model._uuid_++ );
+            i.data( self._guid, self._modelObj._uuid_++ );
 
         },
         //radio checkbox event
         _bindEvent: function(){
             var self = this,
-                model = self._model._model,
+                model = self._modelObj._model,
                 regObj = self._reg;
 
             S.each( model, function( i, key ){
-                if( i.bindEle ){
-                    i.bindEle.each(function( el ){
-                        el.on('click', function( e ){
-                            var attrObj = i;
+                i.$el.on('keyup blur', function( e ){
+                    var attrObj = i;
 
-                            // 启用 validate
-                            if( attrObj.disable === 'false' ){
-                                return;
-                            }
-                            // data-valid 上有数据，否则结束
-                            if( attrObj.reg && typeof attrObj.reg === 'object' ){
-                                self._regEvent( el, attrObj, regObj );
-                            }
-                        })
-                    })
-                }else{
-                    i.$el.on('keydown blur', function( e ){
-                        var attrObj = i;
-
-                        // 启用 validate
-                        if( attrObj.disable === 'false' ){
-                            return;
-                        }
-                        // data-valid 上有数据，否则结束
-                        if( attrObj.reg && typeof attrObj.reg === 'object' ){
-                            self._regEvent( i.$el, attrObj, regObj );
-                        }
-                    });
-                }
+                    // 启用 validate
+                    if( attrObj.disable === 'false' ){
+                        return;
+                    }
+                    // data-valid 上有数据，否则结束
+                    if( attrObj.reg && typeof attrObj.reg === 'object' ){
+                        self._regEvent( i.$el, attrObj, regObj );
+                    }
+                });
                 
             });
-
-            function _bindEventHandlle( ele ){
-                
-            }
         },
         _regEvent: function( element, attrObj, regObj ){
             var self = this,
@@ -187,15 +172,18 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
                     trim = /(^\s*)|(\s*$)/g,
                     val, msg;
 
-                val = attrObj.bindEle ? attrObj.bindEle.filter(':checked').val().replace( trim, '') : element.val().replace( trim, '');
-                
+                val = attrObj.bindEle ? attrObj.bindEle.all(':checked').val() : element.val();
+              
                 // 正则为object
                 if( typeof reg === 'object' ){
                     // match是否为object
                     msg = S.isObject( match ) ? match : reg;
+                    // val exist
+                    val = val ? val.replace( trim, '') : '';
 
                     //success
                     if( val.search( reg.reg ) != -1 )
+                    // if( reg.reg.test( val ) === true )
                     {
                         msg = reg.sucmsg ? reg.sucmsg : cfg.tipSuc ? cfg.tipSuc : '';
                         self._setTpl( element, attrObj, { msg: msg }, 'success' );
@@ -204,7 +192,9 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
                         msg = msg.errmsg ? msg.errmsg : '';
 
                         self._setTpl( element, attrObj, { msg: msg }, 'error' );
-                        self._model.isSubmit = false;
+ 
+                        self._modelObj.isSubmit = false;
+                        
                         isTipError = true;
                     }
                 // 正则为function
@@ -212,22 +202,22 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
 
                     // match是否为array
                     if( S.isArray( match ) ){
-                        arr = match.concat( val );
+                        arr = match.concat( val, $ );
                     }else{
-                        arr = [].concat( val );
+                        arr = [].concat( val, $ );
                     }
 
                     var msgObj = reg.apply( element, arr );
 
-                    if( typeof msg === 'object' ) return;
-                    msg = msgObj.msg ? msgObj.msg : cfg.tipSuc ? cfg.tipSuc : '';
+                    if( typeof msgObj !== 'object' ) return;
+                    msg = msgObj[ 'msg' ] ? msgObj.msg : cfg.tipSuc ? cfg.tipSuc : '';
 
                     if( msg.status ){
                         self._setTpl( element, attrObj, { msg: msg }, 'success' );
-                        self._model.isSubmit = false;
-                        isTipError = true;
                     }else{
                         self._setTpl( element, attrObj, { msg: msg }, 'error' );
+                        self._modelObj.isSubmit = false;
+                        isTipError = true;
                     }
 
                     

@@ -33,9 +33,14 @@ KISSY.add( function( S ) {
         getModel: function(){
             return this._model;
         },
-        setModel: function( index, obj ){
+        setModel: function( ele, obj ){
+            var self = this;
 
-            this._model[ index ] = obj;
+            self._model[ self._uuid_ ] = obj;
+            
+            ele.data( self._guid, self._uuid_ );
+
+            self._uuid_++;
         },
         set: function( index, name, val ){
 

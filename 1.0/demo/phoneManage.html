@@ -127,7 +127,7 @@
                             </label>
                         </div>
                         <div class="span span3">
-                            <input id="" name="radios" type="radio" class="text" value="男" data-valid="{range64: true}" />男
+                            <input id="" name="radios" type="radio" class="text" value="男" data-valid="{empty: true, range64: true}" />男
                             <input id="" name="radios" type="radio" class="text" value="女" />女
                         </div>
                     </div>
@@ -158,7 +158,17 @@
                             </label>
                         </div>
                         <div class="span span3">
-                            <input id="number" name="number" type="password" class="text"  data-valid="{empty: true, range64: true}"/>
+                            <input id="number" name="password" type="password" class="text"  data-valid="{empty: true}"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="span span2 label">
+                            <label for="number">
+                                <i class="required">*</i>再次密码
+                            </label>
+                        </div>
+                        <div class="span span3">
+                            <input id="number" name="password2" type="password" class="text"  data-valid="{empty: true, bind: ['password']}"/>
                         </div>
                     </div>
                     <div class="row">
@@ -244,7 +254,7 @@
     		 * =-----------------------------------------------------------------=
     		 */
 
-            var form = new FormAuth('#J_form',{ isAllTip: false });
+            var form = new FormAuth('#J_form');
 console.log(form);
             //addrule
             form.addRule( {
@@ -302,6 +312,8 @@ console.log(form);
 
             //reset
             $('#J_cancelBtn').on('click', function(){
+                form.valid();
+                return;
                 $('#J_form input').each(function(){
                     var type = $(this).attr('type');
 
