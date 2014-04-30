@@ -2,16 +2,14 @@
  * 表单验证
  * mvvm
  * @time: 2014-4-16
+ * @file: viwe
  * @author: bigwind
  */
 
 KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
     var $ = S.Node.all,
         E = S.Event,
-        D = S.DOM,
-        UA = S.UA,
-        isUpload = false,
-        isTrue = true;
+        D = S.DOM;
         
     function Viwe() {
         this._init.apply(this, arguments);
@@ -20,7 +18,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
     
     S.augment( Viwe, {
         constructor: Viwe,
-        _init: function( element, config, regexp ) {
+        _init: function( element, config, regexp, model ) {
             var self = this;
 
             //config
@@ -28,22 +26,15 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
 
             self._reg = regexp;
 
-            // 创建一个唯一的uuid
-            self._guid = (function(){
-                return '$_' + 
-                    ( +new Date() ) + 
-                    ( Math.random() + '' ).slice( -8 );
-            })();
-
-            self._uuid_ = 1;
-
             // model
-            self._model = [];
+            self._model = model;
+
+            // 唯一的uuid
+            self._guid = self._model._guid;
 
             self.$ele = $( element );
 
-            self.$nodeList = self._getNodeList( self.$ele );            
-console.log(self._model);
+            self._getNodeList();
 
             self._bindEvent();
         },
@@ -75,14 +66,14 @@ console.log(self._model);
                         attrObj.bindEle = nameNode;
                         
                 		for ( n = nameNode.length - 1 ; n >= 0; n-- ) {
-                			list.push( $( nameNode[ n ] ) );
-                            self._setModle( $( nameNode[ n ] ), attrObj )
+                			//list.push( $( nameNode[ n ] ) );
+                            self._setModel( $( nameNode[ n ] ), attrObj )
                 		};
                 		
                 	}else{
                         attrObj = self._getAttr( i );
-                		list.push( i );
-                        self._setModle( i, attrObj );
+                		//list.push( i );
+                        self._setModel( i, attrObj );
                 	};
                     
                 };
@@ -96,10 +87,17 @@ console.log(self._model);
                 i = element,
                 cfg = self.cfg,
                 obj = {
+                    $el: i,
                     disable: '',
                     reg: [],
                     parent: '',
-                    bindEle: null
+                    bindEle: null,
+                    bindTipParent: function( element ){
+                        return element.parent();
+                    },
+                    bindTip: function( element ){
+                        return element.parent().all( '.tip' );
+                    }
                 };
 
             if( i.attr( cfg.attrName ) ){
@@ -117,38 +115,36 @@ console.log(self._model);
             return obj;
 
         },
-        // cache modle
-        _setModle: function( element, attrObj ){
+        // cache model
+        _setModel: function( element, attrObj ){
             var self = this,
                 i = element;
 
-
-            self._model[ self._uuid_ ] = attrObj;
+            self._model.setModel( self._model._uuid_, attrObj);
             
-            i.data( self._guid, self._uuid_++ );
+            i.data( self._guid, self._model._uuid_++ );
 
         },
         //radio checkbox event
         _bindEvent: function(){
             var self = this,
-                model = self._model,
+                model = self._model._model,
                 regObj = self._reg;
 
-            S.each( self.$nodeList, function( i, key ){
-                i.on('click', function( e ){
+            S.each( model, function( i, key ){
+                i.$el.on('keydown blur', function( e ){
                     var ele = e.target,
                         $ele = $( ele ),
                         index = $ele.data( self._guid ),
-                        attrObj = model[ index ];
+                        attrObj = i;
 
                     // 启用 validate
                     if( attrObj.disable === 'false' ){
                         return;
                     }
-                    // console.log(attrObj.reg && typeof attrObj.reg === "object");
                     // data-valid 上有数据，否则结束
                     if( attrObj.reg && typeof attrObj.reg === "object" ){
-                        self._regEvent( $ele, attrObj, regObj );
+                        var isTrue = self._regEvent( $ele, attrObj, regObj );
                     }
                 });
             });
@@ -175,44 +171,49 @@ console.log(self._model);
                     val, msg;
 
                 val = attrObj.bindEle ? attrObj.bindEle.filter(':checked').val().replace( trim, '') : element.val().replace( trim, '');
-                // 正则为array
-
+                
+                // 正则为object
                 if( typeof reg === 'object' ){
+                    // match是否为object
                     msg = S.isObject( match ) ? match : reg;
 
                     //success
                     if( val.search( reg.reg ) != -1 )
                     {
-                        msg = reg.sucmsg ? reg.sucmsg : '';
-                        console.log( msg )
-                        self._setTpl( element, { msg: msg } );
+                        msg = reg.sucmsg ? reg.sucmsg : cfg.tipSuc ? cfg.tipSuc : '';
+                        self._setTpl( element, attrObj, { msg: msg }, 'success' );
                     //error
                     }else{
                         msg = msg.errmsg ? msg.errmsg : '';
 
-                        self._setTpl( element, { msg: msg } );
-                        isTrue = false;
+                        self._setTpl( element, attrObj, { msg: msg }, 'error' );
+                        self._model.isSubmit = false;
                         isTipError = true;
                     }
                 // 正则为function
                 }else if( typeof reg === 'function' ){
 
-                    // data-valid 正则值是否为array
-                    if( S.isArray( attr ) ){
-                        arr = attr.concat( val );
+                    // match是否为array
+                    if( S.isArray( match ) ){
+                        arr = match.concat( val );
                     }else{
                         arr = [].concat( val );
                     }
 
-                    msg = reg.apply( element, arr );
-                    if( msg ){
-                        isTrue = false;
+                    var msgObj = reg.apply( element, arr );
+
+                    if( typeof msg === 'object' ) return;
+                    msg = msgObj.msg ? msgObj.msg : cfg.tipSuc ? cfg.tipSuc : '';
+
+                    if( msg.status ){
+                        self._setTpl( element, attrObj, { msg: msg }, 'success' );
+                        self._model.isSubmit = false;
                         isTipError = true;
                     }else{
-                        msg = '';
+                        self._setTpl( element, attrObj, { msg: msg }, 'error' );
                     }
 
-                    self._setTpl( element, { msg: msg } );
+                    
                 };
                 
             });
@@ -223,113 +224,48 @@ console.log(self._model);
             return new Function("return" + strJSON)();
         },
         // @return { element }
-        _getTpl: function( data ){
+        _getTpl: function( data, status ){
             var self = this,
-                tpl = self.cfg.msg.tpl;
+                tpl = self.cfg.tpl[ status ];
 
             return new XTemplate( tpl ).render( data );
         },
-        _removeTpl: function( element ){
+        _removeTip: function( element, attrObj ){
             var self = this,
-                tip = self.getTip( element.parent() );
+                tip = attrObj.bindTip( element );;
 
             if( tip.length != 0 ){
-                self._renderHTML( tip, '' );
+                tip.remove();
             }
 
         },
-        //append html node
-        _appendTpl: function( element, node ){
-            element.append( node );
-        },
-        //append html text
-        _renderHTML: function( element, html ){
-            element.html( html );
-        },
-        _setTpl: function( element, msg ){
+        _setTpl: function( element, attrObj, msg, status ){
             var self = this,
                 cfg = self.cfg,
-                isClass = true,
-                tip, html;
+                tip, parent, html;
 
-            if( element.attr( cfg.attrTipParent ) ){
-                var ele = element.attr( cfg.attrTipParent );
-                
-                tip = self.getTip( $( ele ) );
-                isClass = false;
-            }else{
-                tip = self.getTip( element.parent() );
-            }
-            // tip = self.getTip( element );
+            tip = attrObj.bindTip( element );
 
+            // tip already exist
             if( tip.length != 0 ){
-                html = msg.msg;
-                self._renderHTML( tip, html );
+                html = self._getTpl( msg, status );
+                tip.replaceWith( html );
+
+            // no tip
             }else{
-                if( isClass ){
-                    tip = self.getTipParent( element );
+                // parent
+                if( attrObj.parent ){
+                    parent = $( attrObj.parent );
                 }else{
-                    tip = $( ele );
+                    parent = attrObj.bindTipParent( element );
                 }
 
-                html = self._getTpl( msg );
-                self._appendTpl( tip, html );
+                html = self._getTpl( msg, status );
+                parent.append( html );
             }
 
-        },
-        //parent node
-        getTipParent: function( element ){
-            return element.parent();
-        },
-        //tip node
-        getTip: function( element ){
-            return element.all( this.cfg.tipClass );
-        },
-        // _getAttr: function(){
-        //     var self = this,
-        //         cfg = self.cfg,
-        //         list = [];
-
-        //     S.each( self.$list, function( i ){
-        //         var attr =  (new Function("return " + i.attr( cfg[ 'attrName' ] )))();
-        //         list.push( attr );
-        //     })
-
-        //     return list;
-        // },
-        getRegexp: function(){
-            return reg;
-        },
-        // bind a new validate
-        field: function( className, regexp ){
-            $( className )
-        },
-        //添加正则
-        addRule: function( regObj ){
-
-            S.mix( reg, regObj );
-        },
-        //删除正则
-        delRule: function( regName ){
-
-            delete reg[ regName ];
-        },
-        disable: function( element ){
-            var self = this,
-                cfg = self.cfg,
-                ele = $( element );
-            
-            ele.val('');
-            ele.attr( cfg.attrDisable, 'true' );
-            self._removeTpl( ele );
-        },
-        enable: function( element ){
-            var self = this,
-                cfg = self.cfg,
-                ele = $( element );
-            
-            ele.attr( cfg.attrDisable, 'false' );
         }
+        
     });
 
     return Viwe;

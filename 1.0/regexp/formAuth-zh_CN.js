@@ -2,9 +2,16 @@
  * 表单验证
  * mvvm
  * @time: 2014-4-16
+ * @file: regexp
  * @author: bigwind
  */
-
+/*
+ * html attribute
+ * regexp: { boolean }
+ * regexp: { object }
+ * function: { array }
+ *
+ */
 KISSY.add( function( S ) {
     return {
             date: { 
@@ -45,7 +52,10 @@ KISSY.add( function( S ) {
             },
             maxLength: function( length, val ){
                 if( val.length > length ){
-                    return '最大长度不能超过' + length;
+                    return {
+                        status: true,
+                        msg: '最大长度不能超过' + length
+                    }
                 } 
             },
             //size unit { KB }
@@ -59,12 +69,18 @@ KISSY.add( function( S ) {
                     obj_img.dynsrc = this[0].value;  
                     filesize = obj_img.fileSize;  
                 }else{  
-                    return "无法获取文件大小，文件小于"+ size +'K';
+                    return {
+                        status: true,
+                        msg: "无法获取文件大小，文件小于"+ size +'K'
+                    };
                 }
                 filesize = ( filesize / 1024 );
 
                 if( filesize > size ){
-                    return '上传文件不能大于'+ size +'K';
+                    return {
+                        status: true,
+                        msg: '上传文件不能大于'+ size +'K'
+                    };
                 }
             }
         }

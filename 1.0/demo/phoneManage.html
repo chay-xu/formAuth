@@ -36,7 +36,7 @@
                             </label>
                         </div>
                         <div class="span span2">
-                            <input id="startRange" name="startRange" type="text" class="text" placeholder="开始范围" data-valid="{empty: true, number: { errmsg:'只能为数字10-16位'} }" value = ""/>
+                            <input id="startRange" name="startRange" type="text" class="text" placeholder="开始范围" data-valid="{empty: true }" value = ""/>
                         </div>
                         <div class="span">-</div>
                         <div class="span span2">
@@ -260,6 +260,10 @@ console.log(form);
                 }
             });
 
+            form.field('#startRange',{ 
+                number: { errmsg:'只能为数字10-16位'} 
+            });
+            
             //calendar
             Calendar.on('dateclick', function(e) {
                 form.valid('#beginTime');
@@ -271,7 +275,7 @@ console.log(form);
                 if( isSubmit ){
                     $('.dialog').css("display", "block");
                 }
-                return isSubmit;
+                return false;
             })
 
             //upload
@@ -282,14 +286,14 @@ console.log(form);
                     $( '#overRange' ).attr('disabled', 'true');
                     form.disable("#startRange");
                     form.disable("#overRange");
-                    form.enable("#uploadFile");
+                    form.disable("#uploadFile", false);
                 }else{
                     $('#uploadWarp').css('display', 'none');
                     $( '#startRange' ).attr('disabled', false);
                     $( '#overRange' ).attr('disabled', false);
                     form.disable("#uploadFile");
-                    form.enable("#startRange");
-                    form.enable("#overRange");
+                    form.disable("#startRange", false);
+                    form.disable("#overRange", false);
                 };
             }
             $("#isUpload").on('click', upload );
