@@ -27,9 +27,9 @@ KISSY.add( function( S ) {
             self._uuid_ = 1;
 
             self.isSubmit = true;
+            // model
+            self._model = {};
         },
-        // model
-        _model: {},
         getModel: function(){
             return this._model;
         },

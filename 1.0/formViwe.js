@@ -6,7 +6,7 @@
  * @author: bigwind
  */
 
-KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
+KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
     var $ = S.Node.all,
         E = S.Event,
         D = S.DOM;
@@ -163,7 +163,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
             S.each( regAttr, function( key, name ){
                 // 禁止多次显示错误
                 if( isTipError ) return false;
-                
+               
                 var match = regAttr[ name ];
                 // 不启用正则
                 if( match === 'false') return;
@@ -192,7 +192,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
                         }else{
                             msg = '';
                         }
-                        
+  console.log(12345)                      
                         self._setTpl( element, attrObj, { msg: msg }, 'success' );
                     //error
                     }else{
@@ -209,25 +209,31 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
 
                     // match是否为array
                     if( S.isArray( match ) ){
-                        arr = match.unshift( element );
+                        arr = [].concat( element, match, Promise );
                     }else{
-                        arr = [].concat( element );
+                        arr = [].concat( element, Promise );
                     }
 
                     // var msgObj = reg.apply( element, arr );
-                    var msgObj = reg.apply( self, arr );
-                    // msg object
-                    if( typeof msgObj !== 'object' ) return;
-                    // msg
-                    if( cfg.isTipSuc ){
-                        msg = msgObj[ 'msg' ] ? msgObj.msg : cfg.tipSuc ? cfg.tipSuc : '';
-                    }else{
-                        msg = '';
-                    }
-                    // render msg
-                    if( msg.status ){
+                    var msgObj = reg.apply( self, arr ),
+                        isObj = (typeof msgObj === 'object');
+console.log( msgObj );
+                    // msg object and render msg
+                    if( isObj && msgObj[ 'status' ] === 'success' ){
+console.log(1111);
+                        // msg
+                        if( cfg.isTipSuc ){
+                            msg = msgObj[ 'sucmsg' ] ? msgObj.sucmsg : cfg.tipSuc ? cfg.tipSuc : '';
+                        }else{
+                            msg = '';
+                        }
+
                         self._setTpl( element, attrObj, { msg: msg }, 'success' );
+                    //}else if(){
+
                     }else{
+                        msg = isObj && msgObj[ 'errmsg' ] ? msgObj.errmsg : '';
+
                         self._setTpl( element, attrObj, { msg: msg }, 'error' );
                         self._modelObj.isSubmit = false;
                         isTipError = true;
@@ -301,5 +307,5 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
 
     return Viwe;
 }, {
-    requires: [ 'event', 'node', 'dom', 'ajax', 'sizzle', 'xtemplate' ]
+    requires: [ 'event', 'node', 'dom', 'ajax', 'promise', 'sizzle', 'xtemplate' ]
 });

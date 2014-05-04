@@ -59,7 +59,8 @@ KISSY.add( function( S ) {
                 errmsg: '只能是txt文件'
             },
             bind: function( field, bindName ){
-                var bindVal = S.Node.all('[name='+ bindName + ']').val();
+                var val = field.val(),
+                    bindVal = S.Node.all('[name='+ bindName + ']').val();
 
                 if( bindVal != val ){
                     return {
@@ -68,8 +69,49 @@ KISSY.add( function( S ) {
                     }
                 }
             },
-            maxLength: function( length, val ){
-                if( val.length > length ){
+            ajax: function( field, Promise ){
+                // var defer = new Promise.Defer(),
+                var name = field.val(),
+                    msgObj;
+
+                var cb = S.IO.get( "json.php", {
+                        name: name
+                    }, function( data ){
+                        console.log(data);
+                        if( data == 'ok'){
+                            //验证成功，传送数据
+                            msgObj = {
+                                status: 'success',
+                                sucmsg: '用户名未注册'
+                            };
+                        }else{
+                            //验证失败，一样传送数据
+                            msgObj =  {
+                                status: 'error',
+                                errmsg: '用户名已注册'
+                            };
+                        }
+                    }, 'text'
+                );
+console.log(cb.promise);
+                return msgObj;
+
+                // cb.then(function( data ){
+                //     if(data[0] == 'ok'){
+                //         //验证成功，传送数据
+                //         defer.resolve('1111');
+                //     }else{
+                //         //验证失败，一样传送数据
+                //         defer.reject('2222');
+                //     }
+                // });
+                
+
+            },
+            maxLength: function( field, length ){
+                var len = field.val();
+
+                if( len >= length ){
                     return {
                         status: 'error',
                         errmsg: '最大长度不能超过' + length
@@ -77,14 +119,14 @@ KISSY.add( function( S ) {
                 } 
             },
             //size unit { KB }
-            fileSize: function( size, userFile ){
+            fileSize: function( field, size ){
                 var filesize = 0;
 
                 if( UA.webkit || UA.gecko ){ 
-                    filesize = this[0].files[0].size;  
+                    filesize = field[0].files[0].size;  
                 }else if( UA.trident ){  
                     var obj_img = document.getElementById('tempimg');  
-                    obj_img.dynsrc = this[0].value;  
+                    obj_img.dynsrc = field[0].value;  
                     filesize = obj_img.fileSize;  
                 }else{  
                     return {

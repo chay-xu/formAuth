@@ -144,11 +144,11 @@
                     <div class="row">
                         <div class="span span2 label">
                             <label for="number">
-                                <i class="required">*</i>合同编号
+                                <i class="required">*</i>用户名
                             </label>
                         </div>
                         <div class="span span3">
-                            <input id="number" name="number" type="text" class="text"  data-valid="{empty: true, range64: true}"/>
+                            <input id="number" name="number" type="text" class="text"  data-valid="{empty: true, ajax: true}"/>
                         </div>
                     </div>
                     <div class="row">
@@ -168,7 +168,7 @@
                             </label>
                         </div>
                         <div class="span span3">
-                            <input id="number" name="password2" type="password" class="text"  data-valid="{empty: true, bind: ['password']}"/>
+                            <input id="number" name="password2" type="password" class="text"  data-valid="{empty: true, bind: ['password','111']}"/>
                         </div>
                     </div>
                     <div class="row">
