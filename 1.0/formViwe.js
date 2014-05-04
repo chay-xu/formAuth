@@ -48,10 +48,10 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
 
             /* 
              * 有attrData属性加入到model
-             * @val { text|hidden|file|password } input
-             * @val { radio|checkbox } input
-             * @val { select } select
-             * @val { textarea } textarea
+             * @type { text|hidden|file|password } input
+             * @type { radio|checkbox } input
+             * @type { select } select
+             * @type { textarea } textarea
              */
             nodelist.each(function( i ){
                 var data = i.attr( attrData ),
@@ -85,7 +85,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
 
             return list;
         },
-        // get attr
+        // get attribute object
         _getAttr: function( element ){
             var self = this,
                 i = element,
@@ -145,13 +145,13 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
                     }
                     // data-valid 上有数据，否则结束
                     if( attrObj.reg && typeof attrObj.reg === 'object' ){
-                        self._regEvent( i.$el, attrObj, regObj );
+                        self._handlerEvent( i.$el, attrObj, regObj );
                     }
                 });
                 
             });
         },
-        _regEvent: function( element, attrObj, regObj ){
+        _handlerEvent: function( element, attrObj, regObj ){
             var self = this,
                 cfg = self.cfg,
                 regAttr = attrObj.reg,
@@ -172,9 +172,10 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
                     trim = /(^\s*)|(\s*$)/g,
                     ele, val, msg;
 
+                // text and checked the value
                 ele = attrObj.bindEle ? $( D.filter( attrObj.bindEle, ':checked' ) ) : element;
                 val = ele.val();
-console.log(val);              
+              
                 // 正则为object
                 if( typeof reg === 'object' ){
                     // match是否为object
@@ -186,7 +187,12 @@ console.log(val);
                     if( val.search( reg.reg ) != -1 )
                     // if( reg.reg.test( val ) === true )
                     {
-                        msg = reg.sucmsg ? reg.sucmsg : cfg.tipSuc ? cfg.tipSuc : '';
+                        if( cfg.isTipSuc ){
+                            msg = reg.sucmsg ? reg.sucmsg : cfg.tipSuc ? cfg.tipSuc : '';
+                        }else{
+                            msg = '';
+                        }
+                        
                         self._setTpl( element, attrObj, { msg: msg }, 'success' );
                     //error
                     }else{
@@ -203,16 +209,22 @@ console.log(val);
 
                     // match是否为array
                     if( S.isArray( match ) ){
-                        arr = match.concat( val, $ );
+                        arr = match.unshift( element );
                     }else{
-                        arr = [].concat( val, $ );
+                        arr = [].concat( element );
                     }
 
-                    var msgObj = reg.apply( element, arr );
-
+                    // var msgObj = reg.apply( element, arr );
+                    var msgObj = reg.apply( self, arr );
+                    // msg object
                     if( typeof msgObj !== 'object' ) return;
-                    msg = msgObj[ 'msg' ] ? msgObj.msg : cfg.tipSuc ? cfg.tipSuc : '';
-
+                    // msg
+                    if( cfg.isTipSuc ){
+                        msg = msgObj[ 'msg' ] ? msgObj.msg : cfg.tipSuc ? cfg.tipSuc : '';
+                    }else{
+                        msg = '';
+                    }
+                    // render msg
                     if( msg.status ){
                         self._setTpl( element, attrObj, { msg: msg }, 'success' );
                     }else{
@@ -228,8 +240,19 @@ console.log(val);
             
             
         },
+        _getEvent: function(){
+
+        },
+        _getValue: function( element ){
+
+        },
         _json: function( strJSON ){
-            return new Function("return" + strJSON)();
+            try{
+                strJSON = new Function('return' + strJSON)();
+            }catch( e ){
+                throw new Error( 'attrData format error' );
+            }
+            return strJSON;
         },
         // @return { element }
         _getTpl: function( data, status ){

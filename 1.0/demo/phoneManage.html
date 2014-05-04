@@ -290,20 +290,20 @@ console.log(form);
 
             //upload
             function upload(){
-                if( $( "#isUpload" ).attr('checked') == 'checked' ){
+                if( $( '#isUpload' ).attr('checked') == 'checked' ){
                     $('#uploadWarp').css('display', 'block');
                     $( '#startRange' ).attr('disabled', 'true');
                     $( '#overRange' ).attr('disabled', 'true');
-                    form.disable("#startRange");
-                    form.disable("#overRange");
-                    form.disable("#uploadFile", false);
+                    form.disable('#startRange', false);
+                    form.disable('#overRange', false);
+                    form.disable('#uploadFile');
                 }else{
                     $('#uploadWarp').css('display', 'none');
                     $( '#startRange' ).attr('disabled', false);
                     $( '#overRange' ).attr('disabled', false);
-                    form.disable("#uploadFile");
-                    form.disable("#startRange", false);
-                    form.disable("#overRange", false);
+                    form.disable('#uploadFile', false);
+                    form.disable('#startRange');
+                    form.disable('#overRange');
                 };
             }
             $("#isUpload").on('click', upload );

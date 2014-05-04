@@ -58,21 +58,21 @@ KISSY.add( function( S ) {
                 reg: /\.(txt|TXT)$/, 
                 errmsg: '只能是txt文件'
             },
-            bind: function( bindName, val, $ ){
-                var bindVal = $('[name='+ bindName + ']').val();
+            bind: function( field, bindName ){
+                var bindVal = S.Node.all('[name='+ bindName + ']').val();
 
                 if( bindVal != val ){
                     return {
-                        status: false,
-                        msg: '密码长度不一致'
+                        status: 'error',
+                        errmsg: '密码长度不一致'
                     }
                 }
             },
             maxLength: function( length, val ){
                 if( val.length > length ){
                     return {
-                        status: false,
-                        msg: '最大长度不能超过' + length
+                        status: 'error',
+                        errmsg: '最大长度不能超过' + length
                     }
                 } 
             },
@@ -88,16 +88,16 @@ KISSY.add( function( S ) {
                     filesize = obj_img.fileSize;  
                 }else{  
                     return {
-                        status: false,
-                        msg: "无法获取文件大小，文件小于"+ size +'K'
+                        status: 'error',
+                        errmsg: "无法获取文件大小，文件小于"+ size +'K'
                     };
                 }
                 filesize = ( filesize / 1024 );
 
                 if( filesize > size ){
                     return {
-                        status: false,
-                        msg: '上传文件不能大于'+ size +'K'
+                        status: 'error',
+                        errmsg: '上传文件不能大于'+ size +'K'
                     };
                 }
             }

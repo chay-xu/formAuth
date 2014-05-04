@@ -15,12 +15,12 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegVa
             attrData: 'data-valid',
             attrTipParent: 'data-parent',
             attrDisable: 'data-disable',
-            attrReadonly: 'readonly',
-            attrCheck: 'data-check',
+            // attrReadonly: 'readonly',
             isReadonly: false,
             isAllTip: false,
             isTipSuc: true,
             tipSuc: '验证成功',
+            regObj: null,
             tpl:{
                 success:'<div class="tip tip-success">{{msg}}</div>',
                 error:'<div class="tip tip-error">{{msg}}</div>'
@@ -91,6 +91,10 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegVa
 
             delete this.reg[ regName ];
         },
+        getRule: function( regName ){
+
+            return regName ? this.reg[ regName ] : this.reg;
+        },
         // bind a new validate
         field: function( className, regexp ){
             var self = this,
@@ -112,9 +116,8 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegVa
                 S.each( self._model, function( i, key ){
 
                     i.$el.fire('keyup');
-                    if( !self.cfg.isAllTip && self._model.isSubmit === false ){
+                    if( !self.cfg.isAllTip && self._modelObj.isSubmit === false ){
                         i.$el.fire( 'focus' );
-                        console.log(i) 
                         return false;
                     }
                     
