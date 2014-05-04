@@ -170,10 +170,11 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, XTemplate ) {
 
                 var reg = regObj[ name ],
                     trim = /(^\s*)|(\s*$)/g,
-                    val, msg;
+                    ele, val, msg;
 
-                val = attrObj.bindEle ? attrObj.bindEle.all(':checked').val() : element.val();
-              
+                ele = attrObj.bindEle ? $( D.filter( attrObj.bindEle, ':checked' ) ) : element;
+                val = ele.val();
+console.log(val);              
                 // 正则为object
                 if( typeof reg === 'object' ){
                     // match是否为object
