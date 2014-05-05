@@ -14,9 +14,9 @@ $name = $_REQUEST[ 'name' ];
 // exit;
 
 if( $name !== 'wind'){
-	echo 'ok';
-}else{
 	echo 'no';
+}else{
+	echo 'ok';
 }
 exit;
 

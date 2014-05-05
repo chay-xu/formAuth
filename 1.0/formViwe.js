@@ -95,6 +95,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                     disable: '',
                     reg: [],
                     parent: '',
+                    event: 'focus keyup blur',
                     bindEle: null,
                     bindTipParent: function( element ){
                         return element.parent();
@@ -136,7 +137,8 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                 regObj = self._reg;
 
             S.each( model, function( i, key ){
-                i.$el.on('keyup blur', function( e ){
+
+                i.$el.on('focus', function( e ){
                     var attrObj = i;
 
                     // 启用 validate
@@ -145,7 +147,20 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                     }
                     // data-valid 上有数据，否则结束
                     if( attrObj.reg && typeof attrObj.reg === 'object' ){
-                        self._handlerEvent( i.$el, attrObj, regObj );
+                        self._handlerWarnEvent( attrObj, regObj );
+                    }
+                });
+
+                i.$el.on('keyup blur', function( e ){
+                    var attrObj = i;
+console.log(e.type)
+                    // 启用 validate
+                    if( attrObj.disable === 'false' ){
+                        return;
+                    }
+                    // data-valid 上有数据，否则结束
+                    if( attrObj.reg && typeof attrObj.reg === 'object' ){
+                        self._handlerEvent( attrObj, regObj );
                     }
                 });
                 
@@ -158,7 +173,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                 isTipError = false, //禁止多次显示错误
                 arr;
 
-            
+console.log( regAttr);            
             // 验证input上多个正则
             S.each( regAttr, function( key, name ){
                 // 禁止多次显示错误
@@ -168,20 +183,15 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                 // 不启用正则
                 if( match === 'false') return;
 
-                var reg = regObj[ name ],
-                    trim = /(^\s*)|(\s*$)/g,
-                    ele, val, msg;
+                var reg = regObj[ name ], val, msg;
 
-                // text and checked the value
-                ele = attrObj.bindEle ? $( D.filter( attrObj.bindEle, ':checked' ) ) : element;
-                val = ele.val();
               
                 // 正则为object
                 if( typeof reg === 'object' ){
                     // match是否为object
                     msg = S.isObject( match ) ? match : reg;
                     // val exist
-                    val = val ? val.replace( trim, '') : '';
+                    val = self._getValue( attrObj );
 
                     //success
                     if( val.search( reg.reg ) != -1 )
@@ -191,11 +201,11 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                             msg = reg.sucmsg ? reg.sucmsg : cfg.tipSuc ? cfg.tipSuc : '';
                         }else{
                             msg = '';
-                        }
-  console.log(12345)                      
+                        }                      
                         self._setTpl( element, attrObj, { msg: msg }, 'success' );
                     //error
                     }else{
+                        console.log(12345)
                         msg = msg.errmsg ? msg.errmsg : '';
 
                         self._setTpl( element, attrObj, { msg: msg }, 'error' );
@@ -246,11 +256,43 @@ console.log(1111);
             
             
         },
+        _handlerWarnEvent: function( attrObj, regObj ){
+            var self = this,
+                regAttr = attrObj.reg,
+                element = attrObj.$el,
+                match, reg, val;
+
+            
+            val = self._getValue( attrObj );
+            if( val !== '' ) return;
+
+            S.each( regAttr, function( key, name ){
+                match = regAttr[ name ];
+                reg = regObj[ name ];
+
+                return false;
+            })
+
+            // match是否为object
+            msg = S.isObject( match ) ? match : reg;
+            msg = msg.warnmsg ? msg.warnmsg : ''
+
+            self._setTpl( element, attrObj, { msg: msg }, 'warn' );
+        },
         _getEvent: function(){
 
         },
-        _getValue: function( element ){
+        _getValue: function( attrObj ){
+            var self = this,
+                trim = /(^\s*)|(\s*$)/g,
+                val, ele;
 
+            // text and checked the value
+            ele = attrObj.bindEle ? $( D.filter( attrObj.bindEle, ':checked' ) ) : attrObj.$el;
+            val = ele.val();
+            val = val ? val.replace( trim, '') : '';
+
+            return val;
         },
         _json: function( strJSON ){
             try{

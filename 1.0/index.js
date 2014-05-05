@@ -5,7 +5,7 @@
  * @author: bigwind
  */
 
-KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegValidate ) {
+KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegValidate, Field ) {
     var $ = S.Node.all,
         E = S.Event,
         D = S.DOM,
@@ -23,14 +23,19 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegVa
             regObj: null,
             tpl:{
                 success:'<div class="tip tip-success">{{msg}}</div>',
-                error:'<div class="tip tip-error">{{msg}}</div>'
+                error:'<div class="tip tip-error">{{msg}}</div>',
+                warn:'<div class="tip tip-msg">{{msg}}</div>'
             }
         };
         
     function FormAuth() {
         this._init.apply(this, arguments);
     }
-
+    var a = new Field(null, {$el: '999'} );
+    var b = new Field(null, {$el: 'xxxx'} )
+console.log( a );
+console.log( b );
+console.log( a );
     
     S.augment( FormAuth, {
         constructor: FormAuth,
@@ -91,7 +96,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegVa
 
             delete this.reg[ regName ];
         },
-        getRule: function( regName ){
+        getRules: function( regName ){
 
             return regName ? this.reg[ regName ] : this.reg;
         },
@@ -131,5 +136,5 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegVa
 
     return FormAuth;
 }, {
-    requires: [ 'event', 'node', 'dom', 'ajax', 'sizzle', './formModel', './formViwe', './regexp/formAuth-zh_CN' ]
+    requires: [ 'event', 'node', 'dom', 'ajax', 'sizzle', './formModel', './formViwe', './regexp/formAuth-zh_CN', './formField' ]
 });

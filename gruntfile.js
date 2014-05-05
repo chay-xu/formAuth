@@ -102,6 +102,27 @@ module.exports = function(grunt) {
                     }
                 ]
             }
+        },
+        // 本地服务器
+        // 文档 https://github.com/gruntjs/grunt-contrib-connect
+        connect: {
+            devServer: {
+                options: {
+                    port: 8000,
+                    hostname: '127.0.0.1',
+                    base: './',
+                    keepalive: true,
+                    middleware: function (connect, options) {
+                        return [
+                            // Serve static files.
+                            connect.static(options.base),
+                            // Make empty directories browsable.
+                            connect.directory(options.base),
+                        ];
+                    }
+                }
+            },
+            testServer: {}
         }
     });
 
@@ -110,5 +131,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-kmc');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-contrib-connect'); // 本地服务器
+
     return grunt.registerTask('default', ['kmc', 'uglify','less','cssmin']);
 };

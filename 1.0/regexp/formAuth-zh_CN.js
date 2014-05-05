@@ -48,7 +48,8 @@ KISSY.add( function( S ) {
             // },
             empty: { 
                 reg: /(.)|(\n)+/g, 
-                errmsg: '必填'
+                errmsg: '必填',
+                warnmsg: '请输入'
             },
             email: { 
                 reg: /^([a-zA-Z0-9\_\-\.])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$/, 
@@ -73,7 +74,7 @@ KISSY.add( function( S ) {
                 // var defer = new Promise.Defer(),
                 var name = field.val(),
                     msgObj;
-
+console.log(this);
                 var cb = S.IO.get( "json.php", {
                         name: name
                     }, function( data ){
@@ -93,7 +94,7 @@ KISSY.add( function( S ) {
                         }
                     }, 'text'
                 );
-console.log(cb.promise);
+// console.log(cb.promise);
                 return msgObj;
 
                 // cb.then(function( data ){
