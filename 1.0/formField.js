@@ -1,7 +1,8 @@
 /**
  * 表单验证
- * mvvm
+ * 
  * @time: 2014-4-16
+ * @file: field
  * @author: bigwind
  */
 
@@ -51,7 +52,7 @@ KISSY.add( function( S ) {
         },
         valid: function( event ){
             var self = this,
-                event = event ? event : 'keyup';
+                event = event ? event : 'blur';
             
             self._model.$el.fire( event );
         }

@@ -1,6 +1,6 @@
 /**
  * 表单验证
- * mvvm
+ * 
  * @time: 2014-4-16
  * @file: regexp
  * @author: bigwind

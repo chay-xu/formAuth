@@ -98,9 +98,9 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                 obj = {
                     $el: i,
                     disable: '',
-                    reg: {},
+                    reg: null,
                     parent: '',
-                    event: 'focus keyup blur',
+                    event: '',
                     bindEle: null,
                     bindTipParent: function( element ){
                         return element.parent();
@@ -122,6 +122,8 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                 obj.parent = i.attr( cfg.attrTipParent );
             }
 
+            obj.event = self._getEvent( i[0].type );
+
             return obj;
         },
         // cache model
@@ -137,13 +139,34 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
         //radio checkbox event
         _bindEvent: function(){
             var self = this,
+                cfg = self.cfg,
                 model = self._modelObj._model,
-                regObj = self._reg;
+                regObj = self._reg,
+                et;
 
             S.each( model, function( i, key ){
+//                 var type = i.$el[0].type;
+// console.log(type);
+//                 if( type != 'radio' && type != 'checkbox' ){
+//                     i.$el.on('focus', function( e ){
+//                         var attrObj = i;
 
-                i.$el.on('focus', function( e ){
-                    var attrObj = i;
+//                         // 启用 validate
+//                         if( attrObj.disable === 'false' ){
+//                             return;
+//                         }
+//                         // data-valid 上有数据，否则结束
+//                         if( attrObj.reg && typeof attrObj.reg === 'object' ){
+//                             self._handlerWarnEvent( attrObj, regObj );
+//                         }
+//                     });
+//                 }
+
+                // et = self._getEvent( type );
+                // if( type == 'select') console.log(et);
+                i.$el.on( i.event, function( e ){
+                    var attrObj = i,
+                        isFocus;
 
                     // 启用 validate
                     if( attrObj.disable === 'false' ){
@@ -151,33 +174,27 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                     }
                     // data-valid 上有数据，否则结束
                     if( attrObj.reg && typeof attrObj.reg === 'object' ){
-                        self._handlerWarnEvent( attrObj, regObj );
-                    }
-                });
+                        isFocus = (e.type === 'focus');
 
-                i.$el.on('keyup blur', function( e ){
-                    var attrObj = i;
-console.log(e.type)
-                    // 启用 validate
-                    if( attrObj.disable === 'false' ){
-                        return;
-                    }
-                    // data-valid 上有数据，否则结束
-                    if( attrObj.reg && typeof attrObj.reg === 'object' ){
-                        self._handlerEvent( attrObj, regObj );
+                        if( isFocus ){
+                            self._handlerWarnEvent( attrObj, regObj );
+                            return;
+                        }
+                        console.log(e.type);
+                            self._handlerEvent( attrObj, regObj );
                     }
                 });
                 
             });
         },
-        _handlerEvent: function( element, attrObj, regObj ){
+        _handlerEvent: function( attrObj, regObj ){
             var self = this,
                 cfg = self.cfg,
+                element = attrObj.$el,
                 regAttr = attrObj.reg,
                 isTipError = false, //禁止多次显示错误
                 arr;
-
-console.log( regAttr);            
+            
             // 验证input上多个正则
             S.each( regAttr, function( key, name ){
                 // 禁止多次显示错误
@@ -188,7 +205,6 @@ console.log( regAttr);
                 if( match === 'false') return;
 
                 var reg = regObj[ name ], val, msg;
-
               
                 // 正则为object
                 if( typeof reg === 'object' ){
@@ -196,7 +212,7 @@ console.log( regAttr);
                     msg = S.isObject( match ) ? match : reg;
                     // val exist
                     val = self._getValue( attrObj );
-
+//console.log( val );
                     //success
                     if( val.search( reg.reg ) != -1 )
                     // if( reg.reg.test( val ) === true )
@@ -209,7 +225,7 @@ console.log( regAttr);
                         self._setTpl( element, attrObj, { msg: msg }, 'success' );
                     //error
                     }else{
-                        console.log(12345)
+//console.log(12345);
                         msg = msg.errmsg ? msg.errmsg : '';
 
                         self._setTpl( element, attrObj, { msg: msg }, 'error' );
@@ -231,10 +247,10 @@ console.log( regAttr);
                     // var msgObj = reg.apply( element, arr );
                     var msgObj = reg.apply( self, arr ),
                         isObj = (typeof msgObj === 'object');
-console.log( msgObj );
+//console.log( msgObj );
                     // msg object and render msg
                     if( isObj && msgObj[ 'status' ] === 'success' ){
-console.log(1111);
+//console.log(1111);
                         // msg
                         if( cfg.isTipSuc ){
                             msg = msgObj[ 'sucmsg' ] ? msgObj.sucmsg : cfg.tipSuc ? cfg.tipSuc : '';
@@ -283,8 +299,25 @@ console.log(1111);
 
             self._setTpl( element, attrObj, { msg: msg }, 'warn' );
         },
-        _getEvent: function(){
+        _getEvent: function( type ){
+            var event = 'blur',
+                self = this,
+                isTipWarn = self.cfg.isTipWarn;
 
+            switch( type ){                
+                case 'checkbox':
+                case 'radio':
+                    event = 'click change';
+                    break;
+                case 'select-multiple':
+                case 'select-one':
+                    event = 'change blur';
+                    break;
+                default:
+                    event = isTipWarn ? 'keyup blur focus' : 'keyup blur';
+            }
+
+            return event;
         },
         _getValue: function( attrObj ){
             var self = this,
@@ -294,7 +327,7 @@ console.log(1111);
             // text and checked the value
             ele = attrObj.bindEle ? $( D.filter( attrObj.bindEle, ':checked' ) ) : attrObj.$el;
             val = ele.val();
-            val = val ? val.replace( trim, '') : '';
+            val = typeof val === 'string' ? val.replace( trim, '') : typeof val === 'object' ? val : '';
 
             return val;
         },
@@ -307,7 +340,7 @@ console.log(1111);
             return strJSON;
         },
         // @return { element }
-        _getTpl: function( data, status ){
+        _getTemplate: function( data, status ){
             var self = this,
                 tpl = self.cfg.tpl[ status ];
 
@@ -331,7 +364,7 @@ console.log(1111);
 
             // tip already exist
             if( tip.length != 0 ){
-                html = self._getTpl( msg, status );
+                html = self._getTemplate( msg, status );
                 tip.replaceWith( html );
 
             // no tip
@@ -343,7 +376,7 @@ console.log(1111);
                     parent = attrObj.bindTipParent( element );
                 }
 
-                html = self._getTpl( msg, status );
+                html = self._getTemplate( msg, status );
                 parent.append( html );
             }
 

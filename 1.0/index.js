@@ -19,8 +19,9 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegVa
             isReadonly: false,
             isAllTip: false,
             isTipSuc: true,
+            isTipWarn: true,
             tipSuc: '验证成功',
-            regObj: null,
+            // regObj: null,
             tpl:{
                 success:'<div class="tip tip-success">{{msg}}</div>',
                 error:'<div class="tip tip-error">{{msg}}</div>',
@@ -117,7 +118,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegVa
 
             return self._model[ index ];
         },
-        valid: function(){
+        validate: function(){
             var self = this,
                 cfg = self.cfg;
             

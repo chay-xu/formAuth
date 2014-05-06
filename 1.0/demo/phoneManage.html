@@ -127,8 +127,35 @@
                             </label>
                         </div>
                         <div class="span span3">
-                            <input id="" name="radios" type="radio" class="text" value="男" data-valid="{empty: true, range64: true}" />男
-                            <input id="" name="radios" type="radio" class="text" value="女" />女
+                            <select id="" name="multiple" multiple style="height:80px;" data-valid="{required: true, select: ['2','2']}">
+                                <option value>请选择</option>
+                                <option value="线上">线上</option>
+                                <option value="线下">线下</option>
+                                <option value="运营商">运营商</option>
+                            </select>
+                            <div class="kf-msg" style=""></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="span span2 label">
+                            <label for="channel">
+                                <i class="required">*</i>渠道
+                            </label>
+                        </div>
+                        <div class="span span3">
+                            <input id="" name="radios" type="radio" class="" value="男" data-valid="{empty: true, range64: true}" />男
+                            <input id="" name="radios" type="radio" class="" value="女" />女
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="span span2 label">
+                            <label for="channel">
+                                <i class="required">*</i>兴趣
+                            </label>
+                        </div>
+                        <div class="span span3">
+                            <input id="" name="checkbox" type="checkbox" class="" value="2" data-valid="{empty: true}" />2
+                            <input id="" name="checkbox" type="checkbox" class="" value="1" />1
                         </div>
                     </div>
                     <div class="row">
@@ -192,7 +219,7 @@
                             </label>
                         </div>
                         <div class="span span3">
-                            <input id="publishTime" name="publish" type="text" class="text" placeholder="发布时间"/>
+                            <textarea id="publishTime" name="publish" class="text" data-valid="{empty: true }" placeholder="发布时间"/></textarea>
                         </div>
                     </div>
 
@@ -255,7 +282,7 @@
     		 */
 
             var form = new FormAuth('#J_form');
-console.log(form);
+//console.log(form);
             //addrule
             form.addRule( {
                 compare: function(){
@@ -270,7 +297,7 @@ console.log(form);
                 }
             });
 
-            console.log( form.getField('#startRange') );
+            //console.log( form.getField('#startRange') );
             
             //calendar
             Calendar.on('dateclick', function(e) {
@@ -279,7 +306,7 @@ console.log(form);
             })
 
             $('#J_form').on('submit', function(){
-                var isSubmit = form.valid();
+                var isSubmit = form.validate();
                 if( isSubmit ){
                     $('.dialog').css("display", "block");
                 }

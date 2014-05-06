@@ -41,11 +41,36 @@ KISSY.add( function( S ) {
                 reg: /^(.){0,50}$/g, 
                 errmsg: '长度不超过50，不允许空格'
             },
-            // empty: function( val ){
-            //     if( val == '' || val == null ){
-            //         return '不能为空';
-            //     }
-            // },
+            required: function( field ){
+                var val = field.val();
+                if( val == 0 || val == '' ){
+                    return {
+                        status: 'error',
+                        errmsg: '必填'
+                    };
+                }else{
+                    return {
+                        status: 'success',
+                        sucmsg: 'ok'
+                    };
+                }
+            },
+            select: function( field, minlen, maxlen ){
+                var val = field.val();
+
+                if( maxlen && val.length > maxlen ){
+                    return {
+                        status: 'error',
+                        errmsg: '最多选择2个'
+                    };
+                }
+                if( minlen && val.length < minlen ){
+                    return {
+                        status: 'error',
+                        errmsg: '最少选择2个'
+                    };
+                }
+            },
             empty: { 
                 reg: /(.)|(\n)+/g, 
                 errmsg: '必填',
