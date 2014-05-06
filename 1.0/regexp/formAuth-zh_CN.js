@@ -58,22 +58,22 @@ KISSY.add( function( S ) {
             },
             select: function( field, minlen, maxlen ){
                 var val;
-                if( field[0].type ){
+                if( field[0].type === 'checkbox'  ){
                     val = S.DOM.filter( field, ':checked' );
                 }else{
                     val = field.val();
                 }
-console.log( field[0].type );
+
                 if( maxlen && val.length > maxlen ){
                     return {
                         status: 'error',
-                        errmsg: '最多选择2个'
+                        errmsg: '最多选择'+ maxlen +'个'
                     };
                 }
                 if( minlen && val.length < minlen ){
                     return {
                         status: 'error',
-                        errmsg: '最少选择2个'
+                        errmsg: '最少选择'+ minlen +'个'
                     };
                 }
 

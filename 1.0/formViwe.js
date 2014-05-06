@@ -200,13 +200,13 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                         }else{
                             msg = '';
                         }                      
-                        self._setTpl( element, attrObj, { msg: msg }, 'success' );
+                        self._render( element, attrObj, { msg: msg }, 'success' );
                     //error
                     }else{
 //console.log(12345);
                         msg = msg.errmsg ? msg.errmsg : '';
 
-                        self._setTpl( element, attrObj, { msg: msg }, 'error' );
+                        self._render( element, attrObj, { msg: msg }, 'error' );
  
                         self._modelObj.isSubmit = false;
                         
@@ -236,13 +236,13 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                             msg = '';
                         }
 
-                        self._setTpl( element, attrObj, { msg: msg }, 'success' );
+                        self._render( element, attrObj, { msg: msg }, 'success' );
                     //}else if(){
 
                     }else{
                         msg = isObj && msgObj[ 'errmsg' ] ? msgObj.errmsg : '';
 
-                        self._setTpl( element, attrObj, { msg: msg }, 'error' );
+                        self._render( element, attrObj, { msg: msg }, 'error' );
                         self._modelObj.isSubmit = false;
                         isTipError = true;
                     }
@@ -275,7 +275,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
             msg = S.isObject( match ) ? match : reg;
             msg = msg.warnmsg ? msg.warnmsg : ''
 
-            self._setTpl( element, attrObj, { msg: msg }, 'warn' );
+            self._render( element, attrObj, { msg: msg }, 'warn' );
         },
         _getEvent: function( type ){
             var event = 'blur',
@@ -334,7 +334,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
             }
 
         },
-        _setTpl: function( element, attrObj, msg, status ){
+        _render: function( element, attrObj, msg, status ){
             var self = this,
                 cfg = self.cfg,
                 tip, parent, html;
