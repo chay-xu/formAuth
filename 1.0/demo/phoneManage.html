@@ -270,9 +270,7 @@ console.log(form);
                 }
             });
 
-            form.field('#startRange',{ 
-                number: { errmsg:'只能为数字10-16位'} 
-            });
+            console.log( form.getField('#startRange') );
             
             //calendar
             Calendar.on('dateclick', function(e) {

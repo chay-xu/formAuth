@@ -31,11 +31,13 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegVa
     function FormAuth() {
         this._init.apply(this, arguments);
     }
-    var a = new Field(null, {$el: '999'} );
-    var b = new Field(null, {$el: 'xxxx'} )
-console.log( a );
-console.log( b );
-console.log( a );
+//     var a = new Field( {$el: '999', reg: {} } );
+//     var b = new Field( {$el: 'xxxx'} )
+// //console.log( a.delRule('yy') );
+// var c = S.merge( a );
+// c.$el = 'lll';
+// console.log( c );
+// console.log( a );
     
     S.augment( FormAuth, {
         constructor: FormAuth,
@@ -101,13 +103,19 @@ console.log( a );
             return regName ? this.reg[ regName ] : this.reg;
         },
         // bind a new validate
-        field: function( className, regexp ){
+        // field: function( className, regexp ){
+        //     var self = this,
+        //         index = $( className ).data( self._guid );
+
+        //     S.mix( self._model[ index ].reg, regexp );
+
+        //     return this;
+        // },
+        getField: function( className ){
             var self = this,
                 index = $( className ).data( self._guid );
 
-            S.mix( self._model[ index ].reg, regexp );
-
-            return this;
+            return self._model[ index ];
         },
         valid: function(){
             var self = this,

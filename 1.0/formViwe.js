@@ -72,12 +72,13 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
 
                             newObj.$el = el;
 
-                            self._modelObj.setModel( el, newObj );    
+                            self._modelObj.setModel( newObj );    
                         })                       
                 	// input/textarea/select
                 	}else{
                         attrObj = self._getAttr( i );
-                        self._modelObj.setModel( i, attrObj );
+
+                        self._modelObj.setModel( attrObj );
                 	};
                     
                 };
@@ -85,7 +86,11 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
 
             return list;
         },
-        // get attribute object
+        /*
+         * get attribute object
+         * @param { object } nodeList
+         * @return { object }
+         */
         _getAttr: function( element ){
             var self = this,
                 i = element,
@@ -93,7 +98,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                 obj = {
                     $el: i,
                     disable: '',
-                    reg: [],
+                    reg: {},
                     parent: '',
                     event: 'focus keyup blur',
                     bindEle: null,
@@ -118,18 +123,17 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
             }
 
             return obj;
-
         },
         // cache model
-        _setModel: function( element, attrObj ){
-            var self = this,
-                i = element;
+        // _setModel: function( element, attrObj ){
+        //     var self = this,
+        //         i = element;
 
-            self._modelObj.setModel( self._modelObj._uuid_, attrObj);
+        //     self._modelObj.setModel( self._modelObj._uuid_, attrObj);
             
-            i.data( self._guid, self._modelObj._uuid_++ );
+        //     // i.data( self._guid, self._modelObj._uuid_++ );
 
-        },
+        // },
         //radio checkbox event
         _bindEvent: function(){
             var self = this,

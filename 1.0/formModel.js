@@ -6,7 +6,7 @@
  * @author: bigwind
  */
 
-KISSY.add( function( S ) {
+KISSY.add( function( S, Field ) {
         
     function Model( element ) {
         this._init.apply(this, arguments);
@@ -33,20 +33,21 @@ KISSY.add( function( S ) {
         getModel: function(){
             return this._model;
         },
-        setModel: function( ele, obj ){
-            var self = this;
+        setModel: function( obj ){
+            var self = this,
+                field;
 
-            self._model[ self._uuid_ ] = obj;
+            // field instantiate
+            field = new Field( obj );
+            self._model[ self._uuid_ ] = field;
             
-            ele.data( self._guid, self._uuid_ );
+            field.$el.data( self._guid, self._uuid_ );
 
             self._uuid_++;
-        },
-        set: function( index, name, val ){
-
-            this._model[ index ][ name ] = val;
         }
     });
 
     return Model;
+},{
+    requires: [ './formField' ]
 });

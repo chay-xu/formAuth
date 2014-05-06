@@ -5,11 +5,7 @@
  * @author: bigwind
  */
 
-KISSY.add( function( S, Event, Node, Dom, IO, Sizzle ) {
-    var $ = S.Node.all,
-        E = S.Event,
-        D = S.DOM,
-        UA = S.UA;
+KISSY.add( function( S ) {
         
     function Field() {
         this._init.apply(this, arguments);
@@ -17,80 +13,49 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle ) {
 
     S.augment( Field, {
         constructor: Field,
-        _init: function( element, config ) {
-            var self = this;   
+        _init: function( config ) {
+            var self = this;
 
-            self.$ele = $( element );
+            // self._model = {};
+            // self._model =  S.mix( self._model, config );
 
-            self.model = {
-                $el: null,
-                disable: '',
-                reg: [],
-                parent: '',
-                event: 'focus keyup blur',
-                bindEle: null,
-                bindTipParent: function( element ){
-                    return element.parent();
-                },
-                bindTip: function( element ){
-                    return element.parent().all( '.tip' );
-                }
-            };
-
-            //config
-            self.model =  S.mix( self.model, config );
+            // model
+            S.mix( self, config );
         },
         //添加正则
         addRule: function( regObj ){
 
-            S.mix( reg, regObj );
+            S.mix( this._model.reg, regObj );
         },
         //删除正则
         delRule: function( regName ){
+            var reg = this._model.reg;
 
-            delete reg[ regName ];
-        },
-        disable: function( element ){
-            var self = this,
-                cfg = self.cfg,
-                ele = $( element );
-            
-            ele.val('');
-            ele.attr( cfg.attrDisable, 'true' );
-            self._removeTpl( ele );
-        },
-        enable: function( element ){
-            var self = this,
-                cfg = self.cfg,
-                ele = $( element );
-            
-            ele.attr( cfg.attrDisable, 'false' );
-        },
-        valid: function(){
-            var self = this,
-                cfg = self.cfg;
-            
-            isTrue = true;
+            if( reg.hasOwnProperty( regName ) ){
+                delete reg[ regName ];
 
-            if( arguments[0] ){
-                $( arguments[0] ).fire('keyup');
+                return true;
             }else{
-                S.each( self.$list, function( i, key ){
-
-                    i.fire('keyup');
-                    if( !self.cfg.isAllTip && isTrue != true ){
-                        i.fire( 'focus' );
-                        return false;
-                    }
-                    
-                }) 
+                return false;
             }
+        },
+        set: function( name, value ){
+            var self = this;
+
+            self._model[ name ] = value;
+        },
+        get: function( name ){
+            var self = this;
+
+            return self._model[ name ];
+        },
+        valid: function( event ){
+            var self = this,
+                event = event ? event : 'keyup';
             
-            return isTrue;
+            self._model.$el.fire( event );
         }
     });
 
     return Field;
-}, {
-    requires: [ 'event', 'node', 'dom', 'ajax', 'sizzle' ]
 });
