@@ -43,6 +43,7 @@ KISSY.add( function( S ) {
             },
             required: function( field ){
                 var val = field.val();
+
                 if( val == 0 || val == '' ){
                     return {
                         status: 'error',
@@ -56,8 +57,13 @@ KISSY.add( function( S ) {
                 }
             },
             select: function( field, minlen, maxlen ){
-                var val = field.val();
-
+                var val;
+                if( field[0].type ){
+                    val = S.DOM.filter( field, ':checked' );
+                }else{
+                    val = field.val();
+                }
+console.log( field[0].type );
                 if( maxlen && val.length > maxlen ){
                     return {
                         status: 'error',
@@ -70,6 +76,11 @@ KISSY.add( function( S ) {
                         errmsg: '最少选择2个'
                     };
                 }
+
+                return {
+                    status: 'success',
+                    sucmsg: 'ok'
+                };
             },
             empty: { 
                 reg: /(.)|(\n)+/g, 

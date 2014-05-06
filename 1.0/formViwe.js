@@ -61,19 +61,15 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                     // radio/checkbox/data-bind
                 	if( i[0].type === 'radio' || i[0].type === 'checkbox' ){
                 		var name = i.attr( 'name' ),
-                			nameNode, n;
+                			nameNode;
 
                 		nameNode = self.$ele.all( 'input[name=' + name + ']');
                         attrObj = self._getAttr( i );
-                        attrObj.bindEle = nameNode;
-                        
-                        nameNode.each(function( el ){
-                            var newObj = S.merge( attrObj );
+                        // nodeList
+                        attrObj.$el = nameNode;
 
-                            newObj.$el = el;
-
-                            self._modelObj.setModel( newObj );    
-                        })                       
+                        self._modelObj.setModel( attrObj );    
+                       
                 	// input/textarea/select
                 	}else{
                         attrObj = self._getAttr( i );
@@ -101,7 +97,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                     reg: null,
                     parent: '',
                     event: '',
-                    bindEle: null,
+                    // bindEle: null,
                     bindTipParent: function( element ){
                         return element.parent();
                     },
@@ -145,25 +141,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                 et;
 
             S.each( model, function( i, key ){
-//                 var type = i.$el[0].type;
-// console.log(type);
-//                 if( type != 'radio' && type != 'checkbox' ){
-//                     i.$el.on('focus', function( e ){
-//                         var attrObj = i;
 
-//                         // 启用 validate
-//                         if( attrObj.disable === 'false' ){
-//                             return;
-//                         }
-//                         // data-valid 上有数据，否则结束
-//                         if( attrObj.reg && typeof attrObj.reg === 'object' ){
-//                             self._handlerWarnEvent( attrObj, regObj );
-//                         }
-//                     });
-//                 }
-
-                // et = self._getEvent( type );
-                // if( type == 'select') console.log(et);
                 i.$el.on( i.event, function( e ){
                     var attrObj = i,
                         isFocus;
@@ -175,13 +153,13 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                     // data-valid 上有数据，否则结束
                     if( attrObj.reg && typeof attrObj.reg === 'object' ){
                         isFocus = (e.type === 'focus');
-
+// console.log(e.type);
                         if( isFocus ){
                             self._handlerWarnEvent( attrObj, regObj );
                             return;
                         }
-                        console.log(e.type);
-                            self._handlerEvent( attrObj, regObj );
+                        
+                        self._handlerEvent( attrObj, regObj );
                     }
                 });
                 
@@ -311,6 +289,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                     break;
                 case 'select-multiple':
                 case 'select-one':
+                case 'file':
                     event = 'change blur';
                     break;
                 default:
@@ -325,7 +304,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                 val, ele;
 
             // text and checked the value
-            ele = attrObj.bindEle ? $( D.filter( attrObj.bindEle, ':checked' ) ) : attrObj.$el;
+            ele = attrObj.$el.length > 1 ? $( D.filter( attrObj.$el, ':checked' ) ) : attrObj.$el;
             val = ele.val();
             val = typeof val === 'string' ? val.replace( trim, '') : typeof val === 'object' ? val : '';
 
