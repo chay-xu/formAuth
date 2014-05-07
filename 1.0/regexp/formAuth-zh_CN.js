@@ -64,6 +64,7 @@ KISSY.add( function( S ) {
                     val = field.val();
                 }
 
+                val = val ? val : '';
                 if( maxlen && val.length > maxlen ){
                     this.setMsg('errmsg', '最多选择'+ maxlen +'个');
                     return false;

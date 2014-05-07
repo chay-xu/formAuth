@@ -55,7 +55,7 @@
                             </label>
                         </div>
                         <div class="span span2">
-                            <input id="uploadFile" name="uploadFile" type="file" class="file" data-valid="{empty: true, txt: true, fileSize: {args: [180]} }" data-disable="true" />
+                            <input id="uploadFile" name="uploadFile" type="file" class="file" data-valid="{empty: true, txt: true, fileSize: {args: [180]} }" data-disable="false" />
                             <img id="tempimg" dynsrc="" src="" style="display:none" />
                         </div>
                     </div>
@@ -66,7 +66,7 @@
                             </label>
                         </div>
                         <div class="span span3">
-                            <select disabled="disabled" id="factory" name="vendor" data-valid="{empty: true}">
+                            <select id="factory" name="vendor" data-valid="{empty: true}">
                                 <option value="">请选择</option>
                             </select>
                         </div>
@@ -78,7 +78,7 @@
                             </label>
                         </div>
                         <div class="span span3">
-                            <select disabled="disabled" id="phone" name="productName" data-valid="{empty: true}">
+                            <select id="phone" name="productName" data-valid="{empty: true}">
                                 <option value="">请选择</option>
                             </select>
                         </div>
@@ -302,8 +302,8 @@
             
             //calendar
             Calendar.on('dateclick', function(e) {
-                form.valid('#beginTime');
-                form.valid('#endTime');
+                form.validate('#beginTime');
+                form.validate('#endTime');
             })
 
             $('#J_form').on('submit', function(){
@@ -320,16 +320,16 @@
                     $('#uploadWarp').css('display', 'block');
                     $( '#startRange' ).attr('disabled', 'true');
                     $( '#overRange' ).attr('disabled', 'true');
-                    form.disable('#startRange', false);
-                    form.disable('#overRange', false);
-                    form.disable('#uploadFile');
+                    form.enable('#startRange', false);
+                    form.enable('#overRange', false);
+                    form.enable('#uploadFile');
                 }else{
                     $('#uploadWarp').css('display', 'none');
                     $( '#startRange' ).attr('disabled', false);
                     $( '#overRange' ).attr('disabled', false);
-                    form.disable('#uploadFile', false);
-                    form.disable('#startRange');
-                    form.disable('#overRange');
+                    form.enable('#uploadFile', false);
+                    form.enable('#startRange');
+                    form.enable('#overRange');
                 };
             }
             $("#isUpload").on('click', upload );
@@ -338,7 +338,7 @@
 
             //reset
             $('#J_cancelBtn').on('click', function(){
-                form.valid();
+                form.validate();
                 return;
                 $('#J_form input').each(function(){
                     var type = $(this).attr('type');

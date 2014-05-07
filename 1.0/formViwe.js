@@ -78,7 +78,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                 cfg = self.cfg,
                 obj = {
                     $el: i,
-                    disable: '',
+                    disable: 'true',
                     rules: null,
                     // tipParent: '',
                     // tip: null,
@@ -104,7 +104,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                 obj.rules = self._json( i.attr( cfg.attrValid ) );
             }
 
-            if( i.attr( cfg.attrDisable ) ){
+            if( i.attr( cfg.attrDisable ) ){                
                 obj.disable = i.attr( cfg.attrDisable );
             }
 
@@ -135,8 +135,11 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
 
                     // 启用 validate
                     if( fieldObj.disable === 'false' ){
+                        
                         return;
                     }
+                    
+                    // console.log(fieldObj.disable);
                     // data-valid 上有数据，否则结束
                     if( fieldObj.rules && typeof fieldObj.rules === 'object' ){
                         isFocus = (e.type === 'focus');
@@ -158,7 +161,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                 element = fieldObj.$el,
                 ruleAttr = fieldObj.rules,
                 isTipError = false, //禁止多次显示错误
-                arr;
+                arr, status;
             
             // 验证input上多个正则
             S.each( ruleAttr, function( key, name ){
@@ -172,7 +175,8 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                 // 不启用正则
                 if( match === 'false') return;
 
-                var rule = ruleObj[ name ], val, msg;
+                var rule = ruleObj[ name ],
+                    val, msg;
               
                 // 正则为object
                 if( typeof rule === 'object' ){
@@ -190,14 +194,15 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                             msg = '';
                         }
 
-                        self._render( element, fieldObj, { msg: msg }, 'success' );
+                        // self._render( element, fieldObj, { msg: msg }, 'success' );
+                        status = 'success';
                     //error
                     }else{
 //console.log(12345);
                         msg = match.errmsg ? match.errmsg : '';
 
-                        self._render( element, fieldObj, { msg: msg }, 'error' );
- 
+                        // self._render( element, fieldObj, { msg: msg }, 'status' );
+                        status = 'error';
                         self._modelObj.isSubmit = false;
                         isTipError = true;
                     }
@@ -218,7 +223,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                     var msgObj = rule.apply( fieldObj, arr );
 
                     if( msgObj || msgObj === undefined ){
-                        console.log(msgObj);
+// console.log(msgObj);
                         // msg
                         if( cfg.isTipSuc ){
                             msg = match.sucmsg ? match.sucmsg : cfg.tipSuc ? cfg.tipSuc : '';
@@ -226,16 +231,16 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                             msg = '';
                         }
 
-                        self._render( element, fieldObj, { msg: msg }, 'success' );
+                        // self._render( element, fieldObj, { msg: msg }, 'success' );
+                        status = 'success';
                     }else{
                         msg = match.errmsg ? match.errmsg : '';
 
-                        self._render( element, fieldObj, { msg: msg }, 'error' );
+                        status = 'error';
                         self._modelObj.isSubmit = false;
                         isTipError = true;
                     }
 
-                    return;
                     // // msg object and render msg
                     // if( isObj && msgObj[ 'status' ] === 'success' ){
 
@@ -259,6 +264,8 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
 
                     
                 };
+
+                self._render( element, fieldObj, { msg: msg }, status );
                 
             });
             
@@ -295,7 +302,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
             switch( type ){                
                 case 'checkbox':
                 case 'radio':
-                    event = 'click change';
+                    event = 'change click';
                     break;
                 case 'select-multiple':
                 case 'select-one':

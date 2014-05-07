@@ -76,20 +76,21 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, Valid
             // self._bindEvent();
 
         },
-        disable: function( element, status ){
+        enable: function( element, status ){
             var self = this,
                 ele = $( element ),
-                status = status ? status : true,
-                index, attrObj;
+                status, index, fieldObj;
+
+            status = status === false ? 'false' : 'true';
             
             index = ele.data( self._guid );
-            attrObj = self._model[ index ];
+            fieldObj = self._model[ index ];
 
             // change model
-            attrObj.disable = String( status );
-
+            fieldObj.disable = String( status );
+ 
             if( status )
-                self._viwe._removeTip( ele, attrObj );
+                self._viwe._removeTip( ele, fieldObj );
 
             return this;
         },
@@ -124,7 +125,9 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, Valid
             }else{
                 S.each( self._model, function( i, key ){
 
-                    i.$el.fire('keyup');
+                    var et = i.event.split( ' ' )[0];
+                    i.$el.fire( et );
+                    console.log(i.$el[0])
                     if( !self.cfg.isAllTip && self._modelObj.isSubmit === false ){
                         i.$el.fire( 'focus' );
                         return false;
