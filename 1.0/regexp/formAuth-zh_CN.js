@@ -65,22 +65,16 @@ KISSY.add( function( S ) {
                 }
 
                 if( maxlen && val.length > maxlen ){
-                    return {
-                        status: 'error',
-                        errmsg: '最多选择'+ maxlen +'个'
-                    };
+                    this.setMsg('errmsg', '最多选择'+ maxlen +'个');
+                    return false;
                 }
                 if( minlen && val.length < minlen ){
-                    return {
-                        status: 'error',
-                        errmsg: '最少选择'+ minlen +'个'
-                    };
+                    this.setMsg('errmsg', '最少选择'+ minlen +'个');
+                    return false;
                 }
+                this.setMsg('sucmsg', '验证成功');
 
-                return {
-                    status: 'success',
-                    sucmsg: 'ok'
-                };
+                return true;
             },
             empty: { 
                 reg: /(.)|(\n)+/g, 
@@ -95,43 +89,40 @@ KISSY.add( function( S ) {
                 reg: /\.(txt|TXT)$/, 
                 errmsg: '只能是txt文件'
             },
-            bind: function( field, bindName ){
+            password: function( field, bindName ){
                 var val = field.val(),
                     bindVal = S.Node.all('[name='+ bindName + ']').val();
 
                 if( bindVal != val ){
-                    return {
-                        status: 'error',
-                        errmsg: '密码长度不一致'
-                    }
+                    this.setMsg('errmsg', '密码不一致');
+                    return false;
                 }
             },
             ajax: function( field, Promise ){
                 // var defer = new Promise.Defer(),
                 var name = field.val(),
-                    msgObj;
-console.log(this);
+                    self = this,
+                    isSuc = null;
+
                 var cb = S.IO.get( "json.php", {
                         name: name
                     }, function( data ){
-                        console.log(data);
+                        
                         if( data == 'ok'){
+
                             //验证成功，传送数据
-                            msgObj = {
-                                status: 'success',
-                                sucmsg: '用户名未注册'
-                            };
+                            self.setMsg('sucmsg', '用户名已注册');
+                            isSuc = true;
                         }else{
+                            
                             //验证失败，一样传送数据
-                            msgObj =  {
-                                status: 'error',
-                                errmsg: '用户名已注册'
-                            };
+                            self.setMsg('errmsg', '用户名未注册');
+                            isSuc = false;
                         }
                     }, 'text'
                 );
-// console.log(cb.promise);
-                return msgObj;
+console.log(isSuc+" "+"----");
+                return isSuc;
 
                 // cb.then(function( data ){
                 //     if(data[0] == 'ok'){

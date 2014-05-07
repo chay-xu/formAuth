@@ -18,13 +18,13 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
     
     S.augment( Viwe, {
         constructor: Viwe,
-        _init: function( element, config, regexp, model ) {
+        _init: function( element, config, rules, model ) {
             var self = this;
 
             //config
             self.cfg = config;
 
-            self._reg = regexp;
+            self._ruleObj = rules;
 
             // model
             self._modelObj = model;
@@ -43,40 +43,24 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
                 nodelist = self.$ele.all( 'input,select,textarea' ),
                 list = [],
                 cfg = self.cfg,
-                attrData = cfg.attrData,
+                attrValid = cfg.attrValid,
                 attrCheck = cfg.attrCheck;
 
             /* 
-             * 有attrData属性加入到model
+             * 有attrValid属性加入到model
              * @type { text|hidden|file|password } input
              * @type { radio|checkbox } input
              * @type { select } select
              * @type { textarea } textarea
              */
             nodelist.each(function( i ){
-                var data = i.attr( attrData ),
+                var data = i.attr( attrValid ),
                     attrObj;
 
                 if( data ){
-                    // radio/checkbox/data-bind
-                	if( i[0].type === 'radio' || i[0].type === 'checkbox' ){
-                		var name = i.attr( 'name' ),
-                			nameNode;
+                    attrObj = self._getAttr( i );
 
-                		nameNode = self.$ele.all( 'input[name=' + name + ']');
-                        attrObj = self._getAttr( i );
-                        // nodeList
-                        attrObj.$el = nameNode;
-
-                        self._modelObj.setModel( attrObj );    
-                       
-                	// input/textarea/select
-                	}else{
-                        attrObj = self._getAttr( i );
-
-                        self._modelObj.setModel( attrObj );
-                	};
-                    
+                    self._modelObj.setModel( attrObj );   
                 };
             })
 
@@ -90,24 +74,34 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
         _getAttr: function( element ){
             var self = this,
                 i = element,
+                type = i[0].type,
                 cfg = self.cfg,
                 obj = {
                     $el: i,
                     disable: '',
-                    reg: null,
-                    parent: '',
+                    rules: null,
+                    // tipParent: '',
+                    // tip: null,
                     event: '',
-                    // bindEle: null,
-                    bindTipParent: function( element ){
-                        return element.parent();
-                    },
-                    bindTip: function( element ){
-                        return element.parent().all( '.tip' );
-                    }
-                };
+                    tpl: null,
+                    filter: '',
+                    // tipWarpper: cfg.tipWarpper,
+                    $parent: null
+                    
+                },
+                nameNode, name;
 
-            if( i.attr( cfg.attrData ) ){
-                obj.reg = self._json( i.attr( cfg.attrData ) );
+            // radio/checkbox/data-bind
+            if( type === 'radio' || type === 'checkbox' ){
+                name = i.attr( 'name' );
+
+                nameNode = self.$ele.all( 'input[name=' + name + ']');
+                // nodeList
+                obj.$el = nameNode;
+            }
+
+            if( i.attr( cfg.attrValid ) ){
+                obj.rules = self._json( i.attr( cfg.attrValid ) );
             }
 
             if( i.attr( cfg.attrDisable ) ){
@@ -115,137 +109,153 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
             }
 
             if( i.attr( cfg.attrTipParent ) ){
-                obj.parent = i.attr( cfg.attrTipParent );
+                obj.$parent = $( i.attr( cfg.attrTipParent ) );
+            }else{
+                obj.$parent = cfg.tipParent( i );
             }
 
+            // bind event
             obj.event = self._getEvent( i[0].type );
 
             return obj;
         },
-        // cache model
-        // _setModel: function( element, attrObj ){
-        //     var self = this,
-        //         i = element;
-
-        //     self._modelObj.setModel( self._modelObj._uuid_, attrObj);
-            
-        //     // i.data( self._guid, self._modelObj._uuid_++ );
-
-        // },
         //radio checkbox event
         _bindEvent: function(){
             var self = this,
                 cfg = self.cfg,
                 model = self._modelObj._model,
-                regObj = self._reg,
+                ruleObj = self._ruleObj,
                 et;
 
             S.each( model, function( i, key ){
 
                 i.$el.on( i.event, function( e ){
-                    var attrObj = i,
+                    var fieldObj = i,
                         isFocus;
 
                     // 启用 validate
-                    if( attrObj.disable === 'false' ){
+                    if( fieldObj.disable === 'false' ){
                         return;
                     }
                     // data-valid 上有数据，否则结束
-                    if( attrObj.reg && typeof attrObj.reg === 'object' ){
+                    if( fieldObj.rules && typeof fieldObj.rules === 'object' ){
                         isFocus = (e.type === 'focus');
 // console.log(e.type);
                         if( isFocus ){
-                            self._handlerWarnEvent( attrObj, regObj );
+                            self._handlerWarnEvent( fieldObj, ruleObj );
                             return;
                         }
                         
-                        self._handlerEvent( attrObj, regObj );
+                        self._handlerEvent( fieldObj, ruleObj );
                     }
                 });
                 
             });
         },
-        _handlerEvent: function( attrObj, regObj ){
+        _handlerEvent: function( fieldObj, ruleObj ){
             var self = this,
                 cfg = self.cfg,
-                element = attrObj.$el,
-                regAttr = attrObj.reg,
+                element = fieldObj.$el,
+                ruleAttr = fieldObj.rules,
                 isTipError = false, //禁止多次显示错误
                 arr;
             
             // 验证input上多个正则
-            S.each( regAttr, function( key, name ){
+            S.each( ruleAttr, function( key, name ){
                 // 禁止多次显示错误
                 if( isTipError ) return false;
                
-                var match = regAttr[ name ];
+                // attr rule
+                var match = ruleAttr[ name ];
+
+                fieldObj._currentRuleName = name;
                 // 不启用正则
                 if( match === 'false') return;
 
-                var reg = regObj[ name ], val, msg;
+                var rule = ruleObj[ name ], val, msg;
               
                 // 正则为object
-                if( typeof reg === 'object' ){
+                if( typeof rule === 'object' ){
                     // match是否为object
-                    msg = S.isObject( match ) ? match : reg;
-                    // val exist
-                    val = self._getValue( attrObj );
-//console.log( val );
+                    match = S.isObject( match ) ? S.mix( rule, match ) : rule;
+                    // value is exist
+                    val = self._getValue( element );
+
                     //success
-                    if( val.search( reg.reg ) != -1 )
-                    // if( reg.reg.test( val ) === true )
+                    if( val.search( match.reg ) != -1 )
                     {
                         if( cfg.isTipSuc ){
-                            msg = reg.sucmsg ? reg.sucmsg : cfg.tipSuc ? cfg.tipSuc : '';
+                            msg = match.sucmsg ? match.sucmsg : cfg.tipSuc ? cfg.tipSuc : '';
                         }else{
                             msg = '';
-                        }                      
-                        self._render( element, attrObj, { msg: msg }, 'success' );
+                        }
+
+                        self._render( element, fieldObj, { msg: msg }, 'success' );
                     //error
                     }else{
 //console.log(12345);
-                        msg = msg.errmsg ? msg.errmsg : '';
+                        msg = match.errmsg ? match.errmsg : '';
 
-                        self._render( element, attrObj, { msg: msg }, 'error' );
+                        self._render( element, fieldObj, { msg: msg }, 'error' );
  
                         self._modelObj.isSubmit = false;
-                        
                         isTipError = true;
                     }
                 // 正则为function
-                }else if( typeof reg === 'function' ){
+                }else if( typeof rule === 'function' ){
 
-                    // match是否为array
-                    if( S.isArray( match ) ){
-                        arr = [].concat( element, match, Promise );
+                    // if( !S.isObject( match ) ) return;
+                    match = S.isObject( match ) ? match : rule;
+
+                    // match.args是否为array
+                    if(  S.isArray( match.args ) ){
+                        arr = [].concat( element, match.args, Promise );
                     }else{
                         arr = [].concat( element, Promise );
                     }
 
                     // var msgObj = reg.apply( element, arr );
-                    var msgObj = reg.apply( self, arr ),
-                        isObj = (typeof msgObj === 'object');
-//console.log( msgObj );
-                    // msg object and render msg
-                    if( isObj && msgObj[ 'status' ] === 'success' ){
-//console.log(1111);
+                    var msgObj = rule.apply( fieldObj, arr );
+
+                    if( msgObj || msgObj === undefined ){
+                        console.log(msgObj);
                         // msg
                         if( cfg.isTipSuc ){
-                            msg = msgObj[ 'sucmsg' ] ? msgObj.sucmsg : cfg.tipSuc ? cfg.tipSuc : '';
+                            msg = match.sucmsg ? match.sucmsg : cfg.tipSuc ? cfg.tipSuc : '';
                         }else{
                             msg = '';
                         }
 
-                        self._render( element, attrObj, { msg: msg }, 'success' );
-                    //}else if(){
-
+                        self._render( element, fieldObj, { msg: msg }, 'success' );
                     }else{
-                        msg = isObj && msgObj[ 'errmsg' ] ? msgObj.errmsg : '';
+                        msg = match.errmsg ? match.errmsg : '';
 
-                        self._render( element, attrObj, { msg: msg }, 'error' );
+                        self._render( element, fieldObj, { msg: msg }, 'error' );
                         self._modelObj.isSubmit = false;
                         isTipError = true;
                     }
+
+                    return;
+                    // // msg object and render msg
+                    // if( isObj && msgObj[ 'status' ] === 'success' ){
+
+                    //     // msg
+                    //     if( cfg.isTipSuc ){
+                    //         msg = msgObj[ 'sucmsg' ] ? msgObj.sucmsg : cfg.tipSuc ? cfg.tipSuc : '';
+                    //     }else{
+                    //         msg = '';
+                    //     }
+
+                    //     self._render( element, fieldObj, { msg: msg }, 'success' );
+                    // //}else if(){
+
+                    // }else{
+                    //     msg = isObj && msgObj[ 'errmsg' ] ? msgObj.errmsg : '';
+
+                    //     self._render( element, fieldObj, { msg: msg }, 'error' );
+                    //     self._modelObj.isSubmit = false;
+                    //     isTipError = true;
+                    // }
 
                     
                 };
@@ -254,28 +264,28 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
             
             
         },
-        _handlerWarnEvent: function( attrObj, regObj ){
+        _handlerWarnEvent: function( fieldObj, ruleObj ){
             var self = this,
-                regAttr = attrObj.reg,
-                element = attrObj.$el,
-                match, reg, val;
+                rulesAttr = fieldObj.rules,
+                element = fieldObj.$el,
+                match, rule, val;
 
             
-            val = self._getValue( attrObj );
+            val = self._getValue( element );
             if( val !== '' ) return;
 
-            S.each( regAttr, function( key, name ){
-                match = regAttr[ name ];
-                reg = regObj[ name ];
+            S.each( rulesAttr, function( key, name ){
+                match = rulesAttr[ name ];
+                rule = ruleObj[ name ];
 
                 return false;
             })
 
             // match是否为object
-            msg = S.isObject( match ) ? match : reg;
-            msg = msg.warnmsg ? msg.warnmsg : ''
+            msg = S.isObject( match ) ? S.mix( rule, match ) : rule;
+            msg = msg.warnmsg ? msg.warnmsg : '';
 
-            self._render( element, attrObj, { msg: msg }, 'warn' );
+            self._render( element, fieldObj, { msg: msg }, 'warn' );
         },
         _getEvent: function( type ){
             var event = 'blur',
@@ -298,13 +308,13 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
 
             return event;
         },
-        _getValue: function( attrObj ){
+        _getValue: function( element ){
             var self = this,
                 trim = /(^\s*)|(\s*$)/g,
                 val, ele;
 
             // text and checked the value
-            ele = attrObj.$el.length > 1 ? $( D.filter( attrObj.$el, ':checked' ) ) : attrObj.$el;
+            ele = element.length > 1 ? $( D.filter( element, ':checked' ) ) : element;
             val = ele.val();
             val = typeof val === 'string' ? val.replace( trim, '') : typeof val === 'object' ? val : '';
 
@@ -314,49 +324,44 @@ KISSY.add( function( S, Event, Node, Dom, IO, Promise, Sizzle, XTemplate ) {
             try{
                 strJSON = new Function('return' + strJSON)();
             }catch( e ){
-                throw new Error( 'attrData format error' );
+                throw new Error( 'attrValid format error' );
             }
             return strJSON;
         },
         // @return { element }
-        _getTemplate: function( data, status ){
+        _getTemplate: function( data, template, status ){
             var self = this,
-                tpl = self.cfg.tpl[ status ];
-
+                tpl = template ? template[ status ] : self.cfg.tpl[ status ];
+// console.log( tpl );
             return new XTemplate( tpl ).render( data );
         },
-        _removeTip: function( element, attrObj ){
-            var self = this,
-                tip = attrObj.bindTip( element );;
+        _removeTip: function( element, fieldObj ){
+            var self = this;
 
-            if( tip.length != 0 ){
-                tip.remove();
+            if( fieldObj.$warpper ){
+                fieldObj.$warpper.html( '' );
             }
 
         },
-        _render: function( element, attrObj, msg, status ){
+        _render: function( element, fieldObj, msg, status ){
             var self = this,
                 cfg = self.cfg,
-                tip, parent, html;
-
-            tip = attrObj.bindTip( element );
+                warpper, html;
 
             // tip already exist
-            if( tip.length != 0 ){
-                html = self._getTemplate( msg, status );
-                tip.replaceWith( html );
+            if( fieldObj.$parent ){
+                html = self._getTemplate( msg, fieldObj.tpl, status );
 
+                fieldObj.$parent.html( html );
             // no tip
             }else{
-                // parent
-                if( attrObj.parent ){
-                    parent = $( attrObj.parent );
-                }else{
-                    parent = attrObj.bindTipParent( element );
-                }
+                // default parent
+                warpper = cfg.tipWarpper( element );
 
-                html = self._getTemplate( msg, status );
-                parent.append( html );
+                html = self._getTemplate( msg, fieldObj.tpl, status );
+
+                warpper.append( html );
+                fieldObj.$parent = warpper;
             }
 
         }

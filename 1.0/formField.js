@@ -17,23 +17,22 @@ KISSY.add( function( S ) {
         _init: function( config ) {
             var self = this;
 
-            // self._model = {};
-            // self._model =  S.mix( self._model, config );
+            self._currentRuleName = '';
 
             // model
             S.mix( self, config );
         },
         //添加正则
-        addRule: function( regObj ){
+        addRule: function( ruleObj ){
 
-            S.mix( this._model.reg, regObj );
+            S.mix( this.rules, ruleObj );
         },
         //删除正则
-        delRule: function( regName ){
-            var reg = this._model.reg;
+        delRule: function( ruleName ){
+            var rules = this.rules;
 
-            if( reg.hasOwnProperty( regName ) ){
-                delete reg[ regName ];
+            if( rules.hasOwnProperty( ruleName ) ){
+                delete rules[ ruleName ];
 
                 return true;
             }else{
@@ -49,6 +48,21 @@ KISSY.add( function( S ) {
             var self = this;
 
             return self._model[ name ];
+        },
+        setMsg: function( status, string ){
+            var self = this,
+                name = self._currentRuleName;
+
+            if( self.rules[ name ] === true ){
+                self.rules[ name ] = {};
+            }
+
+            self.rules[ name ][ status ] = string;
+        },
+        getMsg: function( name ){
+            var self = this;
+
+            return name ? self.rules[ name ] : self.rules;
         },
         valid: function( event ){
             var self = this,

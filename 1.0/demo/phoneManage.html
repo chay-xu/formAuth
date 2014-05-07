@@ -55,7 +55,7 @@
                             </label>
                         </div>
                         <div class="span span2">
-                            <input id="uploadFile" name="uploadFile" type="file" class="file" data-valid="{empty: true, txt: true, fileSize: [180] }" data-disable="true" />
+                            <input id="uploadFile" name="uploadFile" type="file" class="file" data-valid="{empty: true, txt: true, fileSize: {args: [180]} }" data-disable="true" />
                             <img id="tempimg" dynsrc="" src="" style="display:none" />
                         </div>
                     </div>
@@ -127,7 +127,7 @@
                             </label>
                         </div>
                         <div class="span span3">
-                            <select id="" name="multiple" multiple style="height:80px;" data-valid="{required: true, select: ['2','2']}">
+                            <select id="" name="multiple" multiple style="height:80px;" data-valid="{required: true, select: {args:['2','2']} }">
                                 <option value>请选择</option>
                                 <option value="线上">线上</option>
                                 <option value="线下">线下</option>
@@ -154,7 +154,7 @@
                             </label>
                         </div>
                         <div class="span span3">
-                            <input id="" name="checkbox" type="checkbox" class="" value="2" data-valid="{empty: true,select: ['2','2']}" />2
+                            <input id="" name="checkbox" type="checkbox" class="" value="2" data-valid="{empty: true,select: {args:['2','2']} }" />2
                             <input id="" name="checkbox" type="checkbox" class="" value="1" />1
                             <input id="" name="checkbox" type="checkbox" class="" value="3" />3
                         </div>
@@ -166,7 +166,7 @@
                             </label>
                         </div>
                         <div class="span span3" id="active">
-                            <input id="activeVal" name="activity" type="hidden" class="text" value="" data-valid="{range64: true}" />
+                            <input id="activeVal" name="activity" type="hidden" class="text" value="" data-valid="" />
                         </div>
                     </div>
                     <div class="row">
@@ -176,7 +176,7 @@
                             </label>
                         </div>
                         <div class="span span3">
-                            <input id="number" name="number" type="text" class="text"  data-valid="{empty: true, ajax: true}"/>
+                            <input id="number" name="number" type="text" class="text"  data-valid="{empty: true, ajax: true }"/>
                         </div>
                     </div>
                     <div class="row">
@@ -196,7 +196,7 @@
                             </label>
                         </div>
                         <div class="span span3">
-                            <input id="number" name="password2" type="password" class="text"  data-valid="{empty: true, bind: ['password','111']}"/>
+                            <input id="number" name="password2" type="password" class="text"  data-valid="{empty: true, password: {args:['password','111']} }"/>
                         </div>
                     </div>
                     <div class="row">

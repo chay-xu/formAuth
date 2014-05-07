@@ -32,7 +32,9 @@ KISSY.add( function( S, Node, Dom ) {
     S.augment( Rule, {
         constructor: Rule,
         _init: function(){
+            var self = this;
 
+            
         },
         msg: function(){
             var self = this;

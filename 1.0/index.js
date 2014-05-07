@@ -5,14 +5,14 @@
  * @author: bigwind
  */
 
-KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegValidate, Field ) {
+KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, Validate, Field ) {
     var $ = S.Node.all,
         E = S.Event,
         D = S.DOM,
         UA = S.UA,
         isUpload = false,
         def = {
-            attrData: 'data-valid',
+            attrValid: 'data-valid',
             attrTipParent: 'data-parent',
             attrDisable: 'data-disable',
             // attrReadonly: 'readonly',
@@ -22,10 +22,14 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegVa
             isTipWarn: true,
             tipSuc: '验证成功',
             // regObj: null,
+            tipParent: function( element ){
+                $warpper = $('<div class="msg-wrapper"></div>').appendTo( element.parent() );
+                return $warpper;
+            },
             tpl:{
-                success:'<div class="tip tip-success">{{msg}}</div>',
-                error:'<div class="tip tip-error">{{msg}}</div>',
-                warn:'<div class="tip tip-msg">{{msg}}</div>'
+                success:'<div class="tip tip-success-ico">{{msg}}</div>',
+                error:'<div class="tip tip-error-ico">{{msg}}</div>',
+                warn:'<div class="tip tip-warn-ico">{{msg}}</div>'
             }
         };
         
@@ -49,7 +53,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegVa
             // cache
             self.cache = {};
             // reg
-            self.reg = RegValidate;
+            self.ruleObj = Validate;
             // config
             self.cfg = S.merge( def, config );
 
@@ -61,7 +65,7 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegVa
             self._guid = self._modelObj._guid;
 
             // viwe object
-            self._viwe = new FormViwe( element, self.cfg, self.reg, self._modelObj );
+            self._viwe = new FormViwe( element, self.cfg, self.ruleObj, self._modelObj );
 
             // self.$model = self._getNodeList( self.$ele );
             //self.$nodeList = self._viwe.$nodeList;
@@ -103,15 +107,6 @@ KISSY.add( function( S, Event, Node, Dom, IO, Sizzle, FormModel, FormViwe, RegVa
 
             return regName ? this.reg[ regName ] : this.reg;
         },
-        // bind a new validate
-        // field: function( className, regexp ){
-        //     var self = this,
-        //         index = $( className ).data( self._guid );
-
-        //     S.mix( self._model[ index ].reg, regexp );
-
-        //     return this;
-        // },
         getField: function( className ){
             var self = this,
                 index = $( className ).data( self._guid );
